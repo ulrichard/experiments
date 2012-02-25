@@ -1,11 +1,7 @@
 // My first try of OpenCL
 
 // OpenCL
-#ifdef __APPLE__
-#include <OpenCL/opencl.h>
-#else
-#include <CL/cl.h>
-#endif
+#include <CL/cl.hpp>
 // boost
 #include <boost/filesystem.hpp>
 #include <boost/filesystem/fstream.hpp>
@@ -26,81 +22,75 @@ int main(void)
         B[i] = LIST_SIZE - i;
     }
 
-    // Load the kernel source code into the array source_str
-	const bfs::path kernelfile(bfs::path(__FILE__) / "vector_addition.cl");
-	bfs::ifstream ifs(kernelfile);
-	std::string sourcecode;
-	ifs >> sourcecode;
+	try
+	{
+		// Load the kernel source code into a string
+		const bfs::path kernelfile(bfs::path(__FILE__) / "vector_addition.cl");
+		bfs::ifstream ifs(kernelfile);
+		std::string sourcecode;
+		ifs >> sourcecode;
+		ifs.close();
 
-    // Get platform and device information
-    cl_platform_id platform_id = NULL;
-    cl_device_id   device_id   = NULL;   
-    cl_uint ret_num_devices;
-    cl_uint ret_num_platforms;
-    cl_int ret = clGetPlatformIDs(1, &platform_id, &ret_num_platforms);
-    ret = clGetDeviceIDs(platform_id, CL_DEVICE_TYPE_ALL, 1, &device_id, &ret_num_devices);
+		// Get available platforms
+        vector<Platform> platforms;
+        Platform::get(&platforms);
+ 
+        // Select the default platform and create a context using this platform and the GPU
+        cl_context_properties cps[3] = {
+			CL_CONTEXT_PLATFORM, 
+            (cl_context_properties)(platforms[0])(), 
+            0 
+        };
+        Context context(CL_DEVICE_TYPE_GPU, cps);
+ 
+        // Get a list of devices on this platform
+        vector<Device> devices = context.getInfo<CL_CONTEXT_DEVICES>();
+ 
+        // Create a command queue and use the first device
+        CommandQueue queue = CommandQueue(context, devices[0]);
 
-    // Create an OpenCL context
-    cl_context context = clCreateContext(NULL, 1, &device_id, NULL, NULL, &ret);
+		// Make program of the source code in the context
+		Program::Sources source(1, std::make_pair(sourcecode.c_str(), sourcecode.length() + 1));
+        Program program = Program(context, source);
+ 
+        // Build program for these specific devices
+        program.build(devices);
+ 
+        // Make kernel
+        Kernel kernel(program, "vector_addition");
 
-    // Create a command queue
-    cl_command_queue command_queue = clCreateCommandQueue(context, device_id, 0, &ret);
+		// Create memory buffers
+        Buffer bufferA = Buffer(context, CL_MEM_READ_ONLY,  LIST_SIZE * sizeof(int));
+        Buffer bufferB = Buffer(context, CL_MEM_READ_ONLY,  LIST_SIZE * sizeof(int));
+        Buffer bufferC = Buffer(context, CL_MEM_WRITE_ONLY, LIST_SIZE * sizeof(int));
+ 
+        // Copy lists A and B to the memory buffers
+        queue.enqueueWriteBuffer(bufferA, CL_TRUE, 0, LIST_SIZE * sizeof(int), &A[0]);
+        queue.enqueueWriteBuffer(bufferB, CL_TRUE, 0, LIST_SIZE * sizeof(int), &B[0]);
+ 
+        // Set arguments to kernel
+        kernel.setArg(0, bufferA);
+        kernel.setArg(1, bufferB);
+        kernel.setArg(2, bufferC);
 
-    // Create memory buffers on the device for each vector 
-    cl_mem a_mem_obj = clCreateBuffer(context, CL_MEM_READ_ONLY, 
-            LIST_SIZE * sizeof(int), NULL, &ret);
-    cl_mem b_mem_obj = clCreateBuffer(context, CL_MEM_READ_ONLY,
-            LIST_SIZE * sizeof(int), NULL, &ret);
-    cl_mem c_mem_obj = clCreateBuffer(context, CL_MEM_WRITE_ONLY, 
-            LIST_SIZE * sizeof(int), NULL, &ret);
-
-    // Copy the lists A and B to their respective memory buffers
-    ret = clEnqueueWriteBuffer(command_queue, a_mem_obj, CL_TRUE, 0,
-            LIST_SIZE * sizeof(int), &A[0], 0, NULL, NULL);
-    ret = clEnqueueWriteBuffer(command_queue, b_mem_obj, CL_TRUE, 0, 
-            LIST_SIZE * sizeof(int), &B[0], 0, NULL, NULL);
-
-    // Create a program from the kernel source
-	const size_t srclen = sourcecode.length();
-	const char*  srctxt = sourcecode.c_str();
-    cl_program program = clCreateProgramWithSource(context, 1, 
-            (const char **)&srctxt, (const size_t *)&srclen, &ret);
-
-    // Build the program
-    ret = clBuildProgram(program, 1, &device_id, NULL, NULL, NULL);
-
-    // Create the OpenCL kernel
-    cl_kernel kernel = clCreateKernel(program, "vector_addition", &ret);
-
-    // Set the arguments of the kernel
-    ret = clSetKernelArg(kernel, 0, sizeof(cl_mem), (void *)&a_mem_obj);
-    ret = clSetKernelArg(kernel, 1, sizeof(cl_mem), (void *)&b_mem_obj);
-    ret = clSetKernelArg(kernel, 2, sizeof(cl_mem), (void *)&c_mem_obj);
+		// Execute the OpenCL kernel on the list
+		NDRange global(LIST_SIZE);
+        NDRange local(1);
+        queue.enqueueNDRangeKernel(kernel, NullRange, global, local);
     
-    // Execute the OpenCL kernel on the list
-    size_t global_item_size = LIST_SIZE; // Process the entire lists
-    size_t local_item_size = 64; // Process in groups of 64
-    ret = clEnqueueNDRangeKernel(command_queue, kernel, 1, NULL, 
-            &global_item_size, &local_item_size, 0, NULL, NULL);
+	    // Read the memory buffer C on the device to the local vector C
+		queue.enqueueReadBuffer(bufferC, CL_TRUE, 0, LIST_SIZE * sizeof(int), &C[0]);
 
-    // Read the memory buffer C on the device to the local variable C
-    ret = clEnqueueReadBuffer(command_queue, c_mem_obj, CL_TRUE, 0, 
-            LIST_SIZE * sizeof(int), &C[0], 0, NULL, NULL);
 
-    // Display the result to the screen
-    for(size_t i = 0; i < LIST_SIZE; i++)
-        std::cout << A[i] << " + " << B[i] << " = " << C[i] << std::endl;
+		// Display the result to the screen
+		for(size_t i = 0; i < LIST_SIZE; i++)
+		    std::cout << A[i] << " + " << B[i] << " = " << C[i] << std::endl;
 
-    // Clean up
-    ret = clFlush(command_queue);
-    ret = clFinish(command_queue);
-    ret = clReleaseKernel(kernel);
-    ret = clReleaseProgram(program);
-    ret = clReleaseMemObject(a_mem_obj);
-    ret = clReleaseMemObject(b_mem_obj);
-    ret = clReleaseMemObject(c_mem_obj);
-    ret = clReleaseCommandQueue(command_queue);
-    ret = clReleaseContext(context);
+	}
+	catch(cl::Error& err)
+	{
+		std::cout << error.what() << "(" << error.err() << ")" << std::endl;
+	}
     return 0;
 }
 
