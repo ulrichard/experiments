@@ -11,12 +11,12 @@
 
 namespace bfs = boost::filesystem;
 
-int main(void) 
+int main(void)
 {
     // Create the two input vectors
     const size_t LIST_SIZE = 1024;
 	std::vector<double> A(LIST_SIZE), B(LIST_SIZE), C(LIST_SIZE);
-    for(size_t i=0; i<LIST_SIZE; ++i) 
+    for(size_t i=0; i<LIST_SIZE; ++i)
 	{
         A[i] = i;
         B[i] = LIST_SIZE - i;
@@ -32,54 +32,54 @@ int main(void)
 		ifs.close();
 
 		// Get available platforms
-        vector<Platform> platforms;
-        Platform::get(&platforms);
- 
+        std::vector<cl::Platform> platforms;
+        cl::Platform::get(&platforms);
+
         // Select the default platform and create a context using this platform and the GPU
         cl_context_properties cps[3] = {
-			CL_CONTEXT_PLATFORM, 
-            (cl_context_properties)(platforms[0])(), 
-            0 
+			CL_CONTEXT_PLATFORM,
+            (cl_context_properties)(platforms[0])(),
+            0
         };
-        Context context(CL_DEVICE_TYPE_GPU, cps);
- 
+        cl::Context context(CL_DEVICE_TYPE_GPU, cps);
+
         // Get a list of devices on this platform
-        vector<Device> devices = context.getInfo<CL_CONTEXT_DEVICES>();
- 
+        std::vector<cl::Device> devices = context.getInfo<CL_CONTEXT_DEVICES>();
+
         // Create a command queue and use the first device
-        CommandQueue queue = CommandQueue(context, devices[0]);
+        cl::CommandQueue queue = cl::CommandQueue(context, devices[0]);
 
 		// Make program of the source code in the context
-		Program::Sources source(1, std::make_pair(sourcecode.c_str(), sourcecode.length() + 1));
-        Program program = Program(context, source);
- 
+		cl::Program::Sources source(1, std::make_pair(sourcecode.c_str(), sourcecode.length() + 1));
+        cl::Program program = cl::Program(context, source);
+
         // Build program for these specific devices
         program.build(devices);
- 
+
         // Make kernel
-        Kernel kernel(program, "vector_addition");
+        cl::Kernel kernel(program, "vector_addition");
 
 		// Create memory buffers
-        Buffer bufferA = Buffer(context, CL_MEM_READ_ONLY,  LIST_SIZE * sizeof(int));
-        Buffer bufferB = Buffer(context, CL_MEM_READ_ONLY,  LIST_SIZE * sizeof(int));
-        Buffer bufferC = Buffer(context, CL_MEM_WRITE_ONLY, LIST_SIZE * sizeof(int));
- 
+        cl::Buffer bufferA = cl::Buffer(context, CL_MEM_READ_ONLY,  LIST_SIZE * sizeof(double));
+        cl::Buffer bufferB = cl::Buffer(context, CL_MEM_READ_ONLY,  LIST_SIZE * sizeof(double));
+        cl::Buffer bufferC = cl::Buffer(context, CL_MEM_WRITE_ONLY, LIST_SIZE * sizeof(double));
+
         // Copy lists A and B to the memory buffers
-        queue.enqueueWriteBuffer(bufferA, CL_TRUE, 0, LIST_SIZE * sizeof(int), &A[0]);
-        queue.enqueueWriteBuffer(bufferB, CL_TRUE, 0, LIST_SIZE * sizeof(int), &B[0]);
- 
+        queue.enqueueWriteBuffer(bufferA, CL_TRUE, 0, LIST_SIZE * sizeof(double), &A[0]);
+        queue.enqueueWriteBuffer(bufferB, CL_TRUE, 0, LIST_SIZE * sizeof(double), &B[0]);
+
         // Set arguments to kernel
         kernel.setArg(0, bufferA);
         kernel.setArg(1, bufferB);
         kernel.setArg(2, bufferC);
 
 		// Execute the OpenCL kernel on the list
-		NDRange global(LIST_SIZE);
-        NDRange local(1);
-        queue.enqueueNDRangeKernel(kernel, NullRange, global, local);
-    
+		cl::NDRange global(LIST_SIZE);
+        cl::NDRange local(1);
+        queue.enqueueNDRangeKernel(kernel, cl::NullRange, global, local);
+
 	    // Read the memory buffer C on the device to the local vector C
-		queue.enqueueReadBuffer(bufferC, CL_TRUE, 0, LIST_SIZE * sizeof(int), &C[0]);
+		queue.enqueueReadBuffer(bufferC, CL_TRUE, 0, LIST_SIZE * sizeof(double), &C[0]);
 
 
 		// Display the result to the screen
@@ -89,7 +89,7 @@ int main(void)
 	}
 	catch(cl::Error& err)
 	{
-		std::cout << error.what() << "(" << error.err() << ")" << std::endl;
+		std::cout << err.what() << "(" << err.err() << ")" << std::endl;
 	}
     return 0;
 }
