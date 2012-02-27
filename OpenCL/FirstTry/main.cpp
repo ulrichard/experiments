@@ -8,6 +8,7 @@
 // std lib
 #include <vector>
 #include <iostream>
+#include <iterator>
 
 namespace bfs = boost::filesystem;
 
@@ -25,11 +26,14 @@ int main(void)
 	try
 	{
 		// Load the kernel source code into a string
-		const bfs::path kernelfile(bfs::path(__FILE__) / "vector_addition.cl");
+		const bfs::path kernelfile(bfs::path(__FILE__).parent_path() / "vector_addition.cl");
+		if(!bfs::exists(kernelfile))
+            throw std::runtime_error(("OpenCL source file not found!" + kernelfile.string()).c_str());
 		bfs::ifstream ifs(kernelfile);
-		std::string sourcecode;
-		ifs >> sourcecode;
+		const std::string sourcecode(std::istreambuf_iterator<char>(ifs), (std::istreambuf_iterator<char>()));
 		ifs.close();
+		if(sourcecode.length() < 20)
+            throw std::runtime_error("OpenCL source file was empty!");
 
 		// Get available platforms
         std::vector<cl::Platform> platforms;
@@ -89,7 +93,11 @@ int main(void)
 	}
 	catch(cl::Error& err)
 	{
-		std::cout << err.what() << "(" << err.err() << ")" << std::endl;
+		std::cout << "OpenCL error: " << err.what() << "(" << err.err() << ")" << std::endl;
+	}
+	catch(std::exception& ex)
+	{
+		std::cout << "Error: " << ex.what() << std::endl;
 	}
     return 0;
 }
