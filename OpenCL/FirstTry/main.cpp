@@ -1,5 +1,5 @@
 // My first try of OpenCL
-
+#define __CL_ENABLE_EXCEPTIONS
 // OpenCL
 #include <CL/cl.hpp>
 // boost
@@ -16,11 +16,12 @@ int main(void)
 {
     // Create the two input vectors
     const size_t LIST_SIZE = 1024;
-	std::vector<double> A(LIST_SIZE), B(LIST_SIZE), C(LIST_SIZE);
+	std::vector<cl_double> A(LIST_SIZE), B(LIST_SIZE), C(LIST_SIZE);
     for(size_t i=0; i<LIST_SIZE; ++i)
 	{
         A[i] = i;
         B[i] = LIST_SIZE - i;
+        C[i] = 3.14;
     }
 
 	try
@@ -47,11 +48,11 @@ int main(void)
         };
         cl::Context context(CL_DEVICE_TYPE_GPU, cps);
 
-        // Get a list of devices on this platform
+        // Get a list of devices attached to the context
         std::vector<cl::Device> devices = context.getInfo<CL_CONTEXT_DEVICES>();
 
         // Create a command queue and use the first device
-        cl::CommandQueue queue = cl::CommandQueue(context, devices[0]);
+        cl::CommandQueue queue(context, devices[0]);
 
 		// Make program of the source code in the context
 		cl::Program::Sources source(1, std::make_pair(sourcecode.c_str(), sourcecode.length() + 1));
@@ -60,17 +61,13 @@ int main(void)
         // Build program for these specific devices
         program.build(devices);
 
+		// Create memory buffers
+        cl::Buffer bufferA = cl::Buffer(context, CL_MEM_READ_ONLY | CL_MEM_COPY_HOST_PTR,  LIST_SIZE * sizeof(cl_double), reinterpret_cast<void*>(&A[0]));
+        cl::Buffer bufferB = cl::Buffer(context, CL_MEM_READ_ONLY | CL_MEM_COPY_HOST_PTR,  LIST_SIZE * sizeof(cl_double), reinterpret_cast<void*>(&B[0]));
+        cl::Buffer bufferC = cl::Buffer(context, CL_MEM_WRITE_ONLY | CL_MEM_COPY_HOST_PTR, LIST_SIZE * sizeof(cl_double), reinterpret_cast<void*>(&C[0]));
+
         // Make kernel
         cl::Kernel kernel(program, "vector_addition");
-
-		// Create memory buffers
-        cl::Buffer bufferA = cl::Buffer(context, CL_MEM_READ_ONLY,  LIST_SIZE * sizeof(double));
-        cl::Buffer bufferB = cl::Buffer(context, CL_MEM_READ_ONLY,  LIST_SIZE * sizeof(double));
-        cl::Buffer bufferC = cl::Buffer(context, CL_MEM_WRITE_ONLY, LIST_SIZE * sizeof(double));
-
-        // Copy lists A and B to the memory buffers
-        queue.enqueueWriteBuffer(bufferA, CL_TRUE, 0, LIST_SIZE * sizeof(double), &A[0]);
-        queue.enqueueWriteBuffer(bufferB, CL_TRUE, 0, LIST_SIZE * sizeof(double), &B[0]);
 
         // Set arguments to kernel
         kernel.setArg(0, bufferA);
@@ -78,22 +75,24 @@ int main(void)
         kernel.setArg(2, bufferC);
 
 		// Execute the OpenCL kernel on the list
-		cl::NDRange global(LIST_SIZE);
-        cl::NDRange local(1);
-        queue.enqueueNDRangeKernel(kernel, cl::NullRange, global, local);
+        queue.enqueueNDRangeKernel(kernel, cl::NullRange, cl::NDRange(LIST_SIZE), cl::NullRange);
 
-	    // Read the memory buffer C on the device to the local vector C
-		queue.enqueueReadBuffer(bufferC, CL_TRUE, 0, LIST_SIZE * sizeof(double), &C[0]);
-
+        // map bufferC to host pointer. This enforces sync with the host backing space. Remember, we chose a GPU device.
+        cl_double* output = reinterpret_cast<cl_double*>(queue.enqueueMapBuffer(bufferC, CL_TRUE, CL_MAP_READ, 0, LIST_SIZE * sizeof(cl_double)));
 
 		// Display the result to the screen
 		for(size_t i = 0; i < LIST_SIZE; i++)
 		    std::cout << A[i] << " + " << B[i] << " = " << C[i] << std::endl;
 
+        // finally, release our hold on accessing the memory
+        cl_int ret = queue.enqueueUnmapMemObject(bufferC, reinterpret_cast<void*>(output));
 	}
 	catch(cl::Error& err)
 	{
-		std::cout << "OpenCL error: " << err.what() << "(" << err.err() << ")" << std::endl;
+	    if(err.err() == CL_BUILD_PROGRAM_FAILURE)
+            std::cout << "OpenCL error: " << err.what() << "(CL_BUILD_PROGRAM_FAILURE)" << std::endl;
+        else
+            std::cout << "OpenCL error: " << err.what() << "(" << err.err() << ")" << std::endl;
 	}
 	catch(std::exception& ex)
 	{
