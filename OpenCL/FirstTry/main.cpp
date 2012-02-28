@@ -5,10 +5,12 @@
 // boost
 #include <boost/filesystem.hpp>
 #include <boost/filesystem/fstream.hpp>
+#include <boost/foreach.hpp>
 // std lib
 #include <vector>
 #include <iostream>
 #include <iterator>
+#include <sstream>
 
 namespace bfs = boost::filesystem;
 
@@ -16,7 +18,7 @@ int main(void)
 {
     // Create the two input vectors
     const size_t LIST_SIZE = 1024;
-	std::vector<cl_double> A(LIST_SIZE), B(LIST_SIZE), C(LIST_SIZE);
+	std::vector<cl_float> A(LIST_SIZE), B(LIST_SIZE), C(LIST_SIZE);
     for(size_t i=0; i<LIST_SIZE; ++i)
 	{
         A[i] = i;
@@ -40,6 +42,13 @@ int main(void)
         std::vector<cl::Platform> platforms;
         cl::Platform::get(&platforms);
 
+        BOOST_FOREACH(cl::Platform& plfrm, platforms)
+        {
+            std::cout << plfrm.getInfo<CL_PLATFORM_NAME>() << std::endl
+                      << plfrm.getInfo<CL_PLATFORM_VENDOR>() << std::endl
+                      << plfrm.getInfo<CL_PLATFORM_EXTENSIONS>() << std::endl;
+        }
+
         // Select the default platform and create a context using this platform and the GPU
         cl_context_properties cps[3] = {
 			CL_CONTEXT_PLATFORM,
@@ -59,15 +68,27 @@ int main(void)
         cl::Program program = cl::Program(context, source);
 
         // Build program for these specific devices
-        program.build(devices);
+        try
+        {
+            program.build(devices);
+        }
+        catch(cl::Error& err)
+        {
+            std::stringstream sstr;
+            sstr << err.what() << std::endl
+                 << "Build Status: "   << program.getBuildInfo<CL_PROGRAM_BUILD_STATUS>(devices[0]) << std::endl
+                 << "Build Options:\t" << program.getBuildInfo<CL_PROGRAM_BUILD_OPTIONS>(devices[0]).c_str() << std::endl
+                 << "Build Log:\t "    << program.getBuildInfo<CL_PROGRAM_BUILD_LOG>(devices[0]).c_str() << std::endl;
+            throw cl::Error(CL_BUILD_PROGRAM_FAILURE, sstr.str().c_str());
+        }
 
 		// Create memory buffers
-        cl::Buffer bufferA = cl::Buffer(context, CL_MEM_READ_ONLY | CL_MEM_COPY_HOST_PTR,  LIST_SIZE * sizeof(cl_double), reinterpret_cast<void*>(&A[0]));
-        cl::Buffer bufferB = cl::Buffer(context, CL_MEM_READ_ONLY | CL_MEM_COPY_HOST_PTR,  LIST_SIZE * sizeof(cl_double), reinterpret_cast<void*>(&B[0]));
-        cl::Buffer bufferC = cl::Buffer(context, CL_MEM_WRITE_ONLY | CL_MEM_COPY_HOST_PTR, LIST_SIZE * sizeof(cl_double), reinterpret_cast<void*>(&C[0]));
+        cl::Buffer bufferA = cl::Buffer(context, CL_MEM_READ_ONLY | CL_MEM_COPY_HOST_PTR,  LIST_SIZE * sizeof(cl_float), reinterpret_cast<void*>(&A[0]));
+        cl::Buffer bufferB = cl::Buffer(context, CL_MEM_READ_ONLY | CL_MEM_COPY_HOST_PTR,  LIST_SIZE * sizeof(cl_float), reinterpret_cast<void*>(&B[0]));
+        cl::Buffer bufferC = cl::Buffer(context, CL_MEM_WRITE_ONLY | CL_MEM_COPY_HOST_PTR, LIST_SIZE * sizeof(cl_float), reinterpret_cast<void*>(&C[0]));
 
         // Make kernel
-        cl::Kernel kernel(program, "vector_addition");
+        cl::Kernel kernel(program, "VectorAddition");
 
         // Set arguments to kernel
         kernel.setArg(0, bufferA);
@@ -78,7 +99,7 @@ int main(void)
         queue.enqueueNDRangeKernel(kernel, cl::NullRange, cl::NDRange(LIST_SIZE), cl::NullRange);
 
         // map bufferC to host pointer. This enforces sync with the host backing space. Remember, we chose a GPU device.
-        cl_double* output = reinterpret_cast<cl_double*>(queue.enqueueMapBuffer(bufferC, CL_TRUE, CL_MAP_READ, 0, LIST_SIZE * sizeof(cl_double)));
+        cl_float* output = reinterpret_cast<cl_float*>(queue.enqueueMapBuffer(bufferC, CL_TRUE, CL_MAP_READ, 0, LIST_SIZE * sizeof(cl_float)));
 
 		// Display the result to the screen
 		for(size_t i = 0; i < LIST_SIZE; i++)
@@ -89,10 +110,7 @@ int main(void)
 	}
 	catch(cl::Error& err)
 	{
-	    if(err.err() == CL_BUILD_PROGRAM_FAILURE)
-            std::cout << "OpenCL error: " << err.what() << "(CL_BUILD_PROGRAM_FAILURE)" << std::endl;
-        else
-            std::cout << "OpenCL error: " << err.what() << "(" << err.err() << ")" << std::endl;
+	    std::cout << "OpenCL error: " << err.what() << "(" << err.err() << ")" << std::endl;
 	}
 	catch(std::exception& ex)
 	{

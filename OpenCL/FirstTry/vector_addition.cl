@@ -1,5 +1,10 @@
 /// Vector addition simple kernel
-__kernel void VectorAddition(__global double* A, __global double* B, __global double* C)
+
+// must define this macro to being able to use double -> my system doesnt support this extension
+// #pragma OPENCL EXTENSION cl_khr_fp64: enable
+
+
+__kernel void VectorAddition(__global float* A, __global float* B, __global float* C)
 {
     // Get the index of the current element
     const int i = get_global_id(0);
