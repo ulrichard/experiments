@@ -42,7 +42,8 @@ int main(void)
         std::vector<cl::Platform> platforms;
         cl::Platform::get(&platforms);
 
-        BOOST_FOREACH(cl::Platform& plfrm, platforms)
+        // report the found platforms
+        BOOST_FOREACH(const cl::Platform& plfrm, platforms)
         {
             std::cout << plfrm.getInfo<CL_PLATFORM_NAME>() << std::endl
                       << plfrm.getInfo<CL_PLATFORM_VENDOR>() << std::endl
@@ -59,6 +60,14 @@ int main(void)
 
         // Get a list of devices attached to the context
         std::vector<cl::Device> devices = context.getInfo<CL_CONTEXT_DEVICES>();
+
+        // report the found devices for the selected platform
+        BOOST_FOREACH(const cl::Device& device, devices)
+        {
+            std::cout << device.getInfo<CL_DEVICE_NAME>() << std::endl
+                      << device.getInfo<CL_DEVICE_VENDOR>() << std::endl
+                      << device.getInfo<CL_DEVICE_EXTENSIONS>() << std::endl;
+        }
 
         // Create a command queue and use the first device
         cl::CommandQueue queue(context, devices[0]);
@@ -83,9 +92,9 @@ int main(void)
         }
 
 		// Create memory buffers
-        cl::Buffer bufferA = cl::Buffer(context, CL_MEM_READ_ONLY | CL_MEM_COPY_HOST_PTR,  LIST_SIZE * sizeof(cl_float), reinterpret_cast<void*>(&A[0]));
-        cl::Buffer bufferB = cl::Buffer(context, CL_MEM_READ_ONLY | CL_MEM_COPY_HOST_PTR,  LIST_SIZE * sizeof(cl_float), reinterpret_cast<void*>(&B[0]));
-        cl::Buffer bufferC = cl::Buffer(context, CL_MEM_WRITE_ONLY | CL_MEM_COPY_HOST_PTR, LIST_SIZE * sizeof(cl_float), reinterpret_cast<void*>(&C[0]));
+        cl::Buffer bufferA = cl::Buffer(context, CL_MEM_READ_ONLY | CL_MEM_COPY_HOST_PTR, LIST_SIZE * sizeof(cl_float), reinterpret_cast<void*>(&A[0]));
+        cl::Buffer bufferB = cl::Buffer(context, CL_MEM_READ_ONLY | CL_MEM_COPY_HOST_PTR, LIST_SIZE * sizeof(cl_float), reinterpret_cast<void*>(&B[0]));
+        cl::Buffer bufferC = cl::Buffer(context, CL_MEM_WRITE_ONLY | CL_MEM_USE_HOST_PTR, LIST_SIZE * sizeof(cl_float), reinterpret_cast<void*>(&C[0]));
 
         // Make kernel
         cl::Kernel kernel(program, "VectorAddition");
