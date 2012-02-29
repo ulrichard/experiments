@@ -1,103 +1,192 @@
-// My first try of OpenCL
-#define __CL_ENABLE_EXCEPTIONS
-// OpenCL
-#include <CL/cl.hpp>
+
+#include "main.h"
 // boost
 #include <boost/filesystem.hpp>
 #include <boost/filesystem/fstream.hpp>
 #include <boost/foreach.hpp>
+#include <boost/timer.hpp>
+#include <boost/ptr_container/ptr_vector.hpp>
 // std lib
-#include <vector>
+#include <map>
 #include <iostream>
 #include <iterator>
 #include <sstream>
+#include <cmath>
+#include <limits>
 
 namespace bfs = boost::filesystem;
 
+
 int main(void)
 {
-    // Create the two input vectors
-    const size_t LIST_SIZE = 1024;
-	std::vector<cl_float> A(LIST_SIZE), B(LIST_SIZE), C(LIST_SIZE);
-    for(size_t i=0; i<LIST_SIZE; ++i)
-	{
-        A[i] = i;
-        B[i] = LIST_SIZE - i;
-        C[i] = 3.14;
-    }
-
-	try
-	{
-		// Load the kernel source code into a string
-		const bfs::path kernelfile(bfs::path(__FILE__).parent_path() / "vector_addition.cl");
-		if(!bfs::exists(kernelfile))
+    try
+    {
+        // Load the kernel source code into a string
+        const bfs::path kernelfile(bfs::path(__FILE__).parent_path() / "vector_addition.cl");
+        if(!bfs::exists(kernelfile))
             throw std::runtime_error(("OpenCL source file not found!" + kernelfile.string()).c_str());
-		bfs::ifstream ifs(kernelfile);
-		const std::string sourcecode(std::istreambuf_iterator<char>(ifs), (std::istreambuf_iterator<char>()));
-		ifs.close();
-		if(sourcecode.length() < 20)
+        bfs::ifstream ifs(kernelfile);
+        const std::string sourcecode(std::istreambuf_iterator<char>(ifs), (std::istreambuf_iterator<char>()));
+        ifs.close();
+        if(sourcecode.length() < 20)
             throw std::runtime_error("OpenCL source file was empty!");
 
-		// Get available platforms
-        std::vector<cl::Platform> platforms;
+        // Get available platforms
+        std::vector<cl::Platform>   platforms;
         cl::Platform::get(&platforms);
 
-        // report the found platforms
-        BOOST_FOREACH(const cl::Platform& plfrm, platforms)
+        // report the found platforms and create an adder
+        boost::ptr_vector<OpenClVectorAdder> clAdders;
+        BOOST_FOREACH(cl::Platform& plfrm, platforms)
         {
             std::cout << plfrm.getInfo<CL_PLATFORM_NAME>() << std::endl
                       << plfrm.getInfo<CL_PLATFORM_VENDOR>() << std::endl
                       << plfrm.getInfo<CL_PLATFORM_EXTENSIONS>() << std::endl;
+
+            // Select the default platform and create a context using this platform and the GPU
+            cl_context_properties cps[3] = {
+                CL_CONTEXT_PLATFORM,
+                (cl_context_properties)(plfrm)(),
+                0
+            };
+            cl::Context context = cl::Context(CL_DEVICE_TYPE_GPU, cps);
+
+            // Get a list of devices attached to the context
+            std::vector<cl::Device> devices = context.getInfo<CL_CONTEXT_DEVICES>();
+
+            // Make program of the source code in the context
+            cl::Program::Sources source(1, std::make_pair(sourcecode.c_str(), sourcecode.length() + 1));
+            cl::Program program(context, source);
+
+            // Build program for these specific devices
+            try
+            {
+                program.build(devices);
+            }
+            catch(cl::Error& err)
+            {
+                std::stringstream sstr;
+                sstr << err.what() << std::endl
+                     << "Build Status: "   << program.getBuildInfo<CL_PROGRAM_BUILD_STATUS>(devices[0]) << std::endl
+                     << "Build Options:\t" << program.getBuildInfo<CL_PROGRAM_BUILD_OPTIONS>(devices[0]).c_str() << std::endl
+                     << "Build Log:\t "    << program.getBuildInfo<CL_PROGRAM_BUILD_LOG>(devices[0]).c_str() << std::endl;
+                throw cl::Error(CL_BUILD_PROGRAM_FAILURE, sstr.str().c_str());
+            }
+
+            // report the found devices for the selected platform
+            BOOST_FOREACH(cl::Device& device, devices)
+            {
+                std::cout << device.getInfo<CL_DEVICE_NAME>() << std::endl
+                          << device.getInfo<CL_DEVICE_VENDOR>() << std::endl
+                          << device.getInfo<CL_DEVICE_EXTENSIONS>() << std::endl;
+
+                clAdders.push_back(new OpenClVectorAdder(context, device, program));
+            }
+
+
         }
 
-        // Select the default platform and create a context using this platform and the GPU
-        cl_context_properties cps[3] = {
-			CL_CONTEXT_PLATFORM,
-            (cl_context_properties)(platforms[0])(),
-            0
-        };
-        cl::Context context(CL_DEVICE_TYPE_GPU, cps);
 
-        // Get a list of devices attached to the context
-        std::vector<cl::Device> devices = context.getInfo<CL_CONTEXT_DEVICES>();
 
-        // report the found devices for the selected platform
-        BOOST_FOREACH(const cl::Device& device, devices)
+
+
+
+        std::map<size_t, std::map<std::string, double> > timings;
+
+        for(size_t i=10; i<=1e7; i = i << 2)
         {
-            std::cout << device.getInfo<CL_DEVICE_NAME>() << std::endl
-                      << device.getInfo<CL_DEVICE_VENDOR>() << std::endl
-                      << device.getInfo<CL_DEVICE_EXTENSIONS>() << std::endl;
+            BOOST_FOREACH(OpenClVectorAdder& adder, clAdders)
+                timings[i][adder.Device().getInfo<CL_DEVICE_NAME>()] = VectorAdderGPU(i, adder).Exec();
+
+            timings[i]["CPU"] = VectorAdderCPU(i).Exec();
         }
 
-        // Create a command queue and use the first device
-        cl::CommandQueue queue(context, devices[0]);
-
-		// Make program of the source code in the context
-		cl::Program::Sources source(1, std::make_pair(sourcecode.c_str(), sourcecode.length() + 1));
-        cl::Program program = cl::Program(context, source);
-
-        // Build program for these specific devices
-        try
+        std::cout << "VectorSize|";
+        for(auto pp : timings.begin()->second)
+            std::cout << pp.first << "|";
+        std::cout << std::endl;
+        for(auto p1 : timings)
         {
-            program.build(devices);
+            std::cout << p1.first << "|";
+            for(auto p2 : p1.second)
+                std::cout << p2.second << "|";
+            std::cout << std::endl;
         }
-        catch(cl::Error& err)
-        {
-            std::stringstream sstr;
-            sstr << err.what() << std::endl
-                 << "Build Status: "   << program.getBuildInfo<CL_PROGRAM_BUILD_STATUS>(devices[0]) << std::endl
-                 << "Build Options:\t" << program.getBuildInfo<CL_PROGRAM_BUILD_OPTIONS>(devices[0]).c_str() << std::endl
-                 << "Build Log:\t "    << program.getBuildInfo<CL_PROGRAM_BUILD_LOG>(devices[0]).c_str() << std::endl;
-            throw cl::Error(CL_BUILD_PROGRAM_FAILURE, sstr.str().c_str());
-        }
+    }
+    catch(cl::Error& err)
+    {
+        std::cout << "OpenCL error: " << err.what() << "(" << err.err() << ")" << std::endl;
+    }
+    catch(std::exception& ex)
+    {
+        std::cout << "Error: " << ex.what() << std::endl;
+    }
 
+    return 0;
+}
+
+VectorAdderBase::VectorAdderBase(size_t vecSize)
+    : vecSize_(vecSize)
+{
+    arrA.resize(vecSize_);
+    arrB.resize(vecSize_);
+    arrC.resize(vecSize_);
+
+    for(size_t i=0; i<vecSize_; ++i)
+    {
+        arrA[i] = i;
+        arrB[i] = vecSize - i;
+        arrC[i] = 3.14;
+    }
+}
+
+double VectorAdderBase::Exec()
+{
+    boost::timer btim;
+
+    DoExec();
+
+    const double used = btim.elapsed();
+
+    // validate the result
+    for(size_t i = 0; i < vecSize_; i++)
+    {
+//        std::cout << arrA[i] << " + " << arrB[i] << " = " << arrC[i] << std::endl;
+        if(fabs(arrC[i] - vecSize_) > 1e-3)
+            throw std::runtime_error("wrong result");
+    }
+
+    return used;
+}
+
+OpenClVectorAdder::OpenClVectorAdder(cl::Context& context, cl::Device& device, cl::Program& program)
+    : context_(context)
+    , device_(device)
+    , program_(program)
+{
+    // Create a command queue and use the first device
+    queue_ = cl::CommandQueue(context_, device_);
+}
+
+
+VectorAdderGPU::VectorAdderGPU(size_t vecSize, OpenClVectorAdder& ocl)
+    : VectorAdderBase(vecSize)
+    , OCLAdder(ocl)
+{
+
+}
+
+void VectorAdderGPU::DoExec()
+{
+    try
+	{
 		// Create memory buffers
-        cl::Buffer bufferA = cl::Buffer(context, CL_MEM_READ_ONLY | CL_MEM_COPY_HOST_PTR, LIST_SIZE * sizeof(cl_float), reinterpret_cast<void*>(&A[0]));
-        cl::Buffer bufferB = cl::Buffer(context, CL_MEM_READ_ONLY | CL_MEM_COPY_HOST_PTR, LIST_SIZE * sizeof(cl_float), reinterpret_cast<void*>(&B[0]));
-        cl::Buffer bufferC = cl::Buffer(context, CL_MEM_WRITE_ONLY | CL_MEM_USE_HOST_PTR, LIST_SIZE * sizeof(cl_float), reinterpret_cast<void*>(&C[0]));
+        cl::Buffer bufferA = cl::Buffer(OCLAdder.Context(), CL_MEM_READ_ONLY | CL_MEM_COPY_HOST_PTR, vecSize_ * sizeof(cl_float), reinterpret_cast<void*>(&arrA[0]));
+        cl::Buffer bufferB = cl::Buffer(OCLAdder.Context(), CL_MEM_READ_ONLY | CL_MEM_COPY_HOST_PTR, vecSize_ * sizeof(cl_float), reinterpret_cast<void*>(&arrB[0]));
+        cl::Buffer bufferC = cl::Buffer(OCLAdder.Context(), CL_MEM_WRITE_ONLY | CL_MEM_USE_HOST_PTR, vecSize_ * sizeof(cl_float), reinterpret_cast<void*>(&arrC[0]));
 
         // Make kernel
-        cl::Kernel kernel(program, "VectorAddition");
+        cl::Kernel kernel(OCLAdder.Program(), "VectorAddition");
 
         // Set arguments to kernel
         kernel.setArg(0, bufferA);
@@ -105,17 +194,13 @@ int main(void)
         kernel.setArg(2, bufferC);
 
 		// Execute the OpenCL kernel on the list
-        queue.enqueueNDRangeKernel(kernel, cl::NullRange, cl::NDRange(LIST_SIZE), cl::NullRange);
+        OCLAdder.Queue().enqueueNDRangeKernel(kernel, cl::NullRange, cl::NDRange(vecSize_), cl::NullRange);
 
         // map bufferC to host pointer. This enforces sync with the host backing space. Remember, we chose a GPU device.
-        cl_float* output = reinterpret_cast<cl_float*>(queue.enqueueMapBuffer(bufferC, CL_TRUE, CL_MAP_READ, 0, LIST_SIZE * sizeof(cl_float)));
-
-		// Display the result to the screen
-		for(size_t i = 0; i < LIST_SIZE; i++)
-		    std::cout << A[i] << " + " << B[i] << " = " << C[i] << std::endl;
+        cl_float* output = reinterpret_cast<cl_float*>(OCLAdder.Queue().enqueueMapBuffer(bufferC, CL_TRUE, CL_MAP_READ, 0, vecSize_ * sizeof(cl_float)));
 
         // finally, release our hold on accessing the memory
-        cl_int ret = queue.enqueueUnmapMemObject(bufferC, reinterpret_cast<void*>(output));
+        cl_int ret = OCLAdder.Queue().enqueueUnmapMemObject(bufferC, reinterpret_cast<void*>(output));
 	}
 	catch(cl::Error& err)
 	{
@@ -125,6 +210,13 @@ int main(void)
 	{
 		std::cout << "Error: " << ex.what() << std::endl;
 	}
-    return 0;
+}
+
+void VectorAdderCPU::DoExec()
+{
+    for(size_t i=0; i<vecSize_; ++i)
+    {
+        arrC[i] = arrA[i] + arrB[i];
+    }
 }
 
