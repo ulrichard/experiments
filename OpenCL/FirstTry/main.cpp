@@ -82,23 +82,25 @@ int main(void)
 
                 clAdders.push_back(new OpenClVectorAdder(context, device, program));
             }
-
-
         }
 
-
-
-
-
-
+        // now that everything is prepared, run the stuff
         std::map<size_t, std::map<std::string, double> > timings;
 
-        for(size_t i=10; i<=1e7; i = i << 2)
+        for(size_t i=10, j=0; i<=1e7; i = i << 2)
         {
-            BOOST_FOREACH(OpenClVectorAdder& adder, clAdders)
-                timings[i][adder.Device().getInfo<CL_DEVICE_NAME>()] = VectorAdderGPU(i, adder).Exec();
+            boost::timer btim;
 
-            timings[i]["CPU"] = VectorAdderCPU(i).Exec();
+            BOOST_FOREACH(OpenClVectorAdder& adder, clAdders)
+            {
+                for(j=0, btim.restart(); btim.elapsed() < 5.0; ++j)
+                    timings[i][adder.Device().getInfo<CL_DEVICE_NAME>()] += VectorAdderGPU(i, adder).Exec();
+                timings[i][adder.Device().getInfo<CL_DEVICE_NAME>()] /= j;
+            }
+
+            for(j=0, btim.restart(); btim.elapsed() < 5.0; ++j)
+                timings[i]["CPU"] += VectorAdderCPU(i).Exec();
+            timings[i]["CPU"] /= j;
         }
 
         std::cout << "VectorSize|";
