@@ -1,9 +1,17 @@
 #! /bin/bash
 
 # main repo
-sudo apt-get install libboost-filesystem-dev libboost-system-dev 
-# if you have an nvidia card, get the driver along with the opencl implementation from the restricted repository.
-sudo apt-get install nvidia-current-dev
+sudo apt-get install libboost-filesystem-dev libboost-system-dev opencl-headers
+
+if lspci | grep -q "Intel Corporation 3rd Gen Core processor Graphics Controller"; then
+	sudo apt-get install ocl-icd-opencl-dev beignet-dev
+fi;
+
+if lspci | grep -q "nvidia"; then
+	# if you have an nvidia card, get the driver along with the opencl implementation from the restricted repository.
+	sudo apt-get install nvidia-current-dev
+fi;
+
 # I didn't find a package containing the OpenCL C++ wrapper header, so I just download it to the project directory for the time being.
 mkdir -p CL
 rm -rf CL/*

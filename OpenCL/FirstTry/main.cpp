@@ -13,6 +13,7 @@
 #include <sstream>
 #include <cmath>
 #include <limits>
+#include <thread>
 
 namespace bfs = boost::filesystem;
 
@@ -36,12 +37,13 @@ int main(void)
         cl::Platform::get(&platforms);
 
         // report the found platforms and create an adder
+        std::cout << "available platforms: " << std::endl;
         boost::ptr_vector<OpenClVectorAdder> clAdders;
         BOOST_FOREACH(cl::Platform& plfrm, platforms)
         {
-            std::cout << plfrm.getInfo<CL_PLATFORM_NAME>() << std::endl
-                      << plfrm.getInfo<CL_PLATFORM_VENDOR>() << std::endl
-                      << plfrm.getInfo<CL_PLATFORM_EXTENSIONS>() << std::endl;
+            std::cout << " "  << plfrm.getInfo<CL_PLATFORM_NAME>() << std::endl
+                      << "  " << plfrm.getInfo<CL_PLATFORM_VENDOR>() << std::endl
+                      << "  " << plfrm.getInfo<CL_PLATFORM_EXTENSIONS>() << std::endl;
 
             // Select the default platform and create a context using this platform and the GPU
             cl_context_properties cps[3] = {
@@ -73,21 +75,24 @@ int main(void)
                 throw cl::Error(CL_BUILD_PROGRAM_FAILURE, sstr.str().c_str());
             }
 
+	    	std::cout << " devices found: " << std::endl;
             // report the found devices for the selected platform
             BOOST_FOREACH(cl::Device& device, devices)
             {
-                std::cout << device.getInfo<CL_DEVICE_NAME>() << std::endl
-                          << device.getInfo<CL_DEVICE_VENDOR>() << std::endl
-                          << device.getInfo<CL_DEVICE_EXTENSIONS>() << std::endl;
+                std::cout << "   "  << device.getInfo<CL_DEVICE_NAME>() << std::endl
+                          << "    " << device.getInfo<CL_DEVICE_VENDOR>() << std::endl
+                          << "    " << device.getInfo<CL_DEVICE_EXTENSIONS>() << std::endl;
 
                 clAdders.push_back(new OpenClVectorAdder(context, device, program));
             }
         }
 
         // now that everything is prepared, run the stuff
+		std::cout << "now run the stuff" << std::endl;
         std::map<size_t, std::map<std::string, double> > timings;
 
-        for(size_t i=10, j=0; i<=1e7; i = i << 2)
+        const size_t vecSizeCap = 1e7;
+        for(size_t i=10, j=0; i<=vecSizeCap; i = i << 2)
         {
             boost::timer btim;
 
@@ -155,7 +160,11 @@ double VectorAdderBase::Exec()
     {
 //        std::cout << arrA[i] << " + " << arrB[i] << " = " << arrC[i] << std::endl;
         if(fabs(arrC[i] - vecSize_) > 1e-3)
-            throw std::runtime_error("wrong result");
+        {
+            std::stringstream sstr;
+            sstr << "wrong result at vector size " << vecSize_ << " pos "  << i << "  " << arrC[i] << "!= " << vecSize_;
+            throw std::runtime_error(sstr.str());
+        }
     }
 
     return used;
@@ -182,10 +191,16 @@ void VectorAdderGPU::DoExec()
 {
     try
 	{
+	    const bool allowMemorySharing = false; // OCLAdder.Device().getInfo<CL_DEVICE_EXTENSIONS>().has(CL_MEM_USE_HOST_PTR);
+
 		// Create memory buffers
         cl::Buffer bufferA = cl::Buffer(OCLAdder.Context(), CL_MEM_READ_ONLY | CL_MEM_COPY_HOST_PTR, vecSize_ * sizeof(cl_float), reinterpret_cast<void*>(&arrA[0]));
         cl::Buffer bufferB = cl::Buffer(OCLAdder.Context(), CL_MEM_READ_ONLY | CL_MEM_COPY_HOST_PTR, vecSize_ * sizeof(cl_float), reinterpret_cast<void*>(&arrB[0]));
-        cl::Buffer bufferC = cl::Buffer(OCLAdder.Context(), CL_MEM_WRITE_ONLY | CL_MEM_USE_HOST_PTR, vecSize_ * sizeof(cl_float), reinterpret_cast<void*>(&arrC[0]));
+        cl::Buffer bufferC;
+        if(allowMemorySharing)
+            bufferC = cl::Buffer(OCLAdder.Context(), CL_MEM_WRITE_ONLY | CL_MEM_USE_HOST_PTR, vecSize_ * sizeof(cl_float), reinterpret_cast<void*>(&arrC[0]));
+        else
+            bufferC = cl::Buffer(OCLAdder.Context(), CL_MEM_WRITE_ONLY,                       vecSize_ * sizeof(cl_float), reinterpret_cast<void*>(&arrC[0]));
 
         // Make kernel
         cl::Kernel kernel(OCLAdder.Program(), "VectorAddition");
@@ -198,11 +213,25 @@ void VectorAdderGPU::DoExec()
 		// Execute the OpenCL kernel on the list
         OCLAdder.Queue().enqueueNDRangeKernel(kernel, cl::NullRange, cl::NDRange(vecSize_), cl::NullRange);
 
-        // map bufferC to host pointer. This enforces sync with the host backing space. Remember, we chose a GPU device.
-        cl_float* output = reinterpret_cast<cl_float*>(OCLAdder.Queue().enqueueMapBuffer(bufferC, CL_TRUE, CL_MAP_READ, 0, vecSize_ * sizeof(cl_float)));
+        if(allowMemorySharing)
+        {
+            // map bufferC to host pointer. This enforces sync with the host backing space. Remember, we chose a GPU device.
+            cl_float* output = reinterpret_cast<cl_float*>(OCLAdder.Queue().enqueueMapBuffer(bufferC, CL_TRUE, CL_MAP_READ, 0, vecSize_ * sizeof(cl_float)));
 
-        // finally, release our hold on accessing the memory
-        cl_int ret = OCLAdder.Queue().enqueueUnmapMemObject(bufferC, reinterpret_cast<void*>(output));
+            // finally, release our hold on accessing the memory
+            cl_int ret = OCLAdder.Queue().enqueueUnmapMemObject(bufferC, reinterpret_cast<void*>(output));
+        }
+        else
+        {
+            // Read the memory buffer C on the device to the local vector C
+            OCLAdder.Queue().enqueueReadBuffer(bufferC, CL_TRUE, 0, vecSize_ * sizeof(cl_float), &arrC[0]);
+
+#ifdef _DEBUG
+            OCLAdder.Queue().flush();
+            std::copy(std::begin(arrC), std::end(arrC), std::ostream_iterator<float>(std::cout, " "));
+#endif
+        }
+
 	}
 	catch(cl::Error& err)
 	{
@@ -212,6 +241,7 @@ void VectorAdderGPU::DoExec()
 	{
 		std::cout << "Error: " << ex.what() << std::endl;
 	}
+
 }
 
 void VectorAdderCPU::DoExec()

@@ -11,4 +11,7 @@ __kernel void VectorAddition(__global float* A, __global float* B, __global floa
 
     // Do the operation
     C[i] = A[i] + B[i];
+
+    // set a fixed value for debugging
+    C[i] = 1234.5f;
 }
