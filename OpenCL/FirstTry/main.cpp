@@ -191,16 +191,10 @@ void VectorAdderGPU::DoExec()
 {
     try
 	{
-	    const bool allowMemorySharing = false; // OCLAdder.Device().getInfo<CL_DEVICE_EXTENSIONS>().has(CL_MEM_USE_HOST_PTR);
-
 		// Create memory buffers
         cl::Buffer bufferA = cl::Buffer(OCLAdder.Context(), CL_MEM_READ_ONLY | CL_MEM_COPY_HOST_PTR, vecSize_ * sizeof(cl_float), reinterpret_cast<void*>(&arrA[0]));
         cl::Buffer bufferB = cl::Buffer(OCLAdder.Context(), CL_MEM_READ_ONLY | CL_MEM_COPY_HOST_PTR, vecSize_ * sizeof(cl_float), reinterpret_cast<void*>(&arrB[0]));
-        cl::Buffer bufferC;
-        if(allowMemorySharing)
-            bufferC = cl::Buffer(OCLAdder.Context(), CL_MEM_WRITE_ONLY | CL_MEM_USE_HOST_PTR, vecSize_ * sizeof(cl_float), reinterpret_cast<void*>(&arrC[0]));
-        else
-            bufferC = cl::Buffer(OCLAdder.Context(), CL_MEM_WRITE_ONLY,                       vecSize_ * sizeof(cl_float), reinterpret_cast<void*>(&arrC[0]));
+        cl::Buffer bufferC = cl::Buffer(OCLAdder.Context(), CL_MEM_WRITE_ONLY,                       vecSize_ * sizeof(cl_float), reinterpret_cast<void*>(&arrC[0]));
 
         // Make kernel
         cl::Kernel kernel(OCLAdder.Program(), "VectorAddition");
@@ -213,25 +207,8 @@ void VectorAdderGPU::DoExec()
 		// Execute the OpenCL kernel on the list
         OCLAdder.Queue().enqueueNDRangeKernel(kernel, cl::NullRange, cl::NDRange(vecSize_), cl::NullRange);
 
-        if(allowMemorySharing)
-        {
-            // map bufferC to host pointer. This enforces sync with the host backing space. Remember, we chose a GPU device.
-            cl_float* output = reinterpret_cast<cl_float*>(OCLAdder.Queue().enqueueMapBuffer(bufferC, CL_TRUE, CL_MAP_READ, 0, vecSize_ * sizeof(cl_float)));
-
-            // finally, release our hold on accessing the memory
-            cl_int ret = OCLAdder.Queue().enqueueUnmapMemObject(bufferC, reinterpret_cast<void*>(output));
-        }
-        else
-        {
-            // Read the memory buffer C on the device to the local vector C
-            OCLAdder.Queue().enqueueReadBuffer(bufferC, CL_TRUE, 0, vecSize_ * sizeof(cl_float), &arrC[0]);
-
-#ifdef _DEBUG
-            OCLAdder.Queue().flush();
-            std::copy(std::begin(arrC), std::end(arrC), std::ostream_iterator<float>(std::cout, " "));
-#endif
-        }
-
+        // Read the memory buffer C on the device to the local vector C
+        OCLAdder.Queue().enqueueReadBuffer(bufferC, CL_TRUE, 0, vecSize_ * sizeof(cl_float), &arrC[0]);
 	}
 	catch(cl::Error& err)
 	{
