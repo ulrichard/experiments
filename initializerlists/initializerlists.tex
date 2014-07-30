@@ -1,0 +1,53 @@
+\documentclass[11pt]{beamer}
+\usetheme{Frankfurt}
+\usepackage[utf8]{inputenc}
+\usepackage[german]{babel}
+\usepackage{amsmath}
+\usepackage{amsfonts}
+\usepackage{amssymb}
+
+
+\usepackage{color}
+\definecolor{mygreen}{rgb}{0,0.6,0}
+\definecolor{mygray}{rgb}{0.5,0.5,0.5}
+
+\usepackage{listings}
+% https://en.wikibooks.org/wiki/LaTeX/Source_Code_Listings
+\lstset{basicstyle=\scriptsize % http://texblog.org/2012/08/29/changing-the-font-size-in-latex/
+        , commentstyle=\color{mygreen}
+        , keywordstyle=\color{blue}
+        , language=C++
+        %, frame=single
+    }
+
+\author{Richard Ulrich}
+\title{C++11 initializer lists}
+%\setbeamercovered{transparent} 
+%\setbeamertemplate{navigation symbols}{} 
+%\logo{cubx_logo.png} 
+\institute{cubx Software AG} 
+%\date{} 
+%\subject{} 
+\begin{document}
+
+\begin{frame}
+\titlepage
+\end{frame}
+
+%\begin{frame}
+%\tableofcontents
+%\end{frame}
+
+\begin{frame}{container initialization in C++98}
+\lstinputlisting[language=C++]{@initializerlists_SOURCE_DIR@/container_98.cpp}
+\end{frame}
+
+\begin{frame}{container initialization in C++11}
+\lstinputlisting[language=C++]{@initializerlists_SOURCE_DIR@/container_11.cpp}
+\end{frame}
+
+\begin{frame}{initialization list constructor}
+\lstinputlisting[language=C++]{@initializerlists_SOURCE_DIR@/constructor.cpp}
+\end{frame}
+
+\end{document}
