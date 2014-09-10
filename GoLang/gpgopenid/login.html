@@ -1,0 +1,28 @@
+<html>
+  <head>
+    <title>go OpenID sample app</title>
+    <script>
+    function setId(id) {
+      document.forms[0].id.value = id;
+      document.forms[0].submit();
+      return false;
+    }
+    </script>
+  </head>
+  <body>
+    <h1>Login</h1>
+
+    <form action="/discover" method="POST">
+      <input type="hidden" name="id">
+    </form>
+
+    <h2>Sign in with:</h2>
+    <ul>
+      <li>
+        <button onclick="return setId('https://id.fedoraproject.org/')">
+          FAS
+        </button>
+      </li>
+    </ul>
+  </body>
+</html>
