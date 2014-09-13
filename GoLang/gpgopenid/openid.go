@@ -20,8 +20,26 @@ var nonceStore = &openid.SimpleNonceStore{
 var discoveryCache = &openid.SimpleDiscoveryCache{}
 
 func indexHandler(w http.ResponseWriter, r *http.Request) {
+    log.Println("index", r.Method, r.URL)
+
+    foundOpenPGPHeader := false;
+    for key, value := range r.Header {
+        log.Println(key, " = ", value)
+        if "X-Auth-OpenPGP" == key {
+            log.Println("we have an OpenPGP header")
+            foundOpenPGPHeader = true;
+        }
+    }
+
+    var htmlFile string;
+    if foundOpenPGPHeader {
+        htmlFile = "index.html"
+    } else {
+        htmlFile = "enigform.html"
+    }
+
     p := make(map[string]string)
-    if t, err := template.ParseFiles(dataDir + "index.html"); err == nil {
+    if t, err := template.ParseFiles(dataDir + htmlFile); err == nil {
         t.Execute(w, p)
     } else {
         log.Print(err)
