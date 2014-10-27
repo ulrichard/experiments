@@ -5,7 +5,7 @@
 \usepackage{amsmath}
 \usepackage{amsfonts}
 \usepackage{amssymb}
-
+\usepackage{url}
 \usepackage{color}
 \definecolor{mygreen}{rgb}{0,0.6,0}
 \definecolor{mygray}{rgb}{0.5,0.5,0.5}
@@ -50,7 +50,7 @@
 \end{frame}
 
 \begin{frame}{What the celebrities say}
-\emph{Herb Sutter} (http://herbsutter.com/elements-of-modern-c-style)\\
+\emph{Herb Sutter} (\href{http://herbsutter.com/elements-of-modern-c-style}{herbsutter.com/elements-of-modern-c-style})\\
 
 What hasn’t changed: When initializing a local variable whose type is non-POD or auto, continue using the familiar = syntax without extra curly braces.\\
 In other cases, including especially everywhere that you would have used ( ) parentheses when constructing an object, prefer using { } braces instead. Using braces avoids several potential problems: you can’t accidentally get narrowing conversions (e.g., float to int), you won’t occasionally accidentally have uninitialized POD member variables or arrays, and you’ll avoid the occasional C++98 surprise that your code compiles but actually declares a function rather than a variable because of a declaration ambiguity in C++’s grammar – what Scott Meyers famously calls “C++’s most vexing parse.” There’s nothing vexing about the new style.
@@ -65,3 +65,5 @@ In other cases, including especially everywhere that you would have used ( ) par
 \end{frame}
 
 \end{document}
+
+
