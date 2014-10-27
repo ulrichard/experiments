@@ -1,0 +1,96 @@
+package main
+
+import(
+//    "./openid"
+    "github.com/kushaldas/openid.go/src/openid"
+    "html/template"
+    "log"
+    "net/http"
+)
+
+const dataDir = "./"
+
+// For the demo, we use in-memory infinite storage nonce and discovery
+// cache. In your app, do not use this as it will eat up memory and never
+// free it. Use your own implementation, on a better database system.
+// If you have multiple servers for example, you may need to share at least
+// the nonceStore between them.
+var nonceStore = &openid.SimpleNonceStore{
+    Store: make(map[string][]*openid.Nonce)}
+var discoveryCache = &openid.SimpleDiscoveryCache{}
+
+func indexHandler(w http.ResponseWriter, r *http.Request) {
+    log.Println("index", r.Method, r.URL)
+
+    foundOpenPGPHeader := false;
+    for key, value := range r.Header {
+        log.Println(key, " = ", value)
+        if "X-Auth-OpenPGP" == key {
+            log.Println("we have an OpenPGP header")
+            foundOpenPGPHeader = true;
+        }
+    }
+
+    var htmlFile string;
+    if foundOpenPGPHeader {
+        htmlFile = "index.html"
+    } else {
+        htmlFile = "enigform.html"
+    }
+
+    p := make(map[string]string)
+    if t, err := template.ParseFiles(dataDir + htmlFile); err == nil {
+        t.Execute(w, p)
+    } else {
+        log.Print(err)
+    }
+}
+
+func loginHandler(w http.ResponseWriter, r *http.Request) {
+    p := make(map[string]string)
+    if t, err := template.ParseFiles(dataDir + "login.html"); err == nil {
+        t.Execute(w, p)
+    } else {
+        log.Print(err)
+    }
+}
+
+func discoverHandler(w http.ResponseWriter, r *http.Request) {
+    if url, err := openid.RedirectUrl(r.FormValue("id"),
+    "http://localhost:8088/openidcallback",
+    ""); err == nil {
+        http.Redirect(w, r, url, 303)
+    } else {
+        log.Print(err)
+    }
+}
+
+func callbackHandler(w http.ResponseWriter, r *http.Request) {
+    fullUrl := "http://localhost:8088" + r.URL.String()
+    log.Print(fullUrl)
+    id, err := openid.Verify(
+        fullUrl,
+        discoveryCache, nonceStore)
+    if err == nil {
+        p := make(map[string]string)
+        log.Println(id)
+        p["user"] = id["user"]
+        if t, err := template.ParseFiles(dataDir + "index.html"); err == nil {
+            t.Execute(w, p)
+        } else {
+            log.Println("WTF")
+            log.Print(err)
+        }
+    } else {
+        log.Println("WTF2")
+        log.Print(err)
+    }
+}
+
+func main() {
+    http.HandleFunc("/", indexHandler)
+    http.HandleFunc("/login", loginHandler)
+    http.HandleFunc("/discover", discoverHandler)
+    http.HandleFunc("/openidcallback", callbackHandler)
+    http.ListenAndServe(":8088", nil)
+}
