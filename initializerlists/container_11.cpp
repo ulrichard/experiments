@@ -4,10 +4,10 @@
 
 int main()
 {
-    const int ia[] = {1, 2, 3};
-    const std::vector<int> iv = {1, 2, 3};
-    const std::map<int, std::string> mis = {{1, "one"}
-                                          , {2, "two"}}; 
+    const int ia[]{1, 2, 3};
+    const std::vector<int> iv{1, 2, 3};
+    const std::map<int, std::string> mis{{1, "one"}
+                                       , {2, "two"}}; 
 
     auto iil = {1, 2, 3};
     const std::vector<int> iv2 = iil;
