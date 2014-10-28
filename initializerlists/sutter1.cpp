@@ -2,10 +2,10 @@
 int a = 42;        // still fine, as always
 
 // C++ 11
-auto x = begin(v); // no narrowing or non-initialization is possible
+auto x = begin(v); // no narrowing or non-initialization possible
 
 // C++98
-rectangle       w(origin(), extents());   // oops, declares a function, if origin and extents are types
+rectangle       w(origin(), extents()); // declares a function
 complex<double> c(2.71828, 3.14159);
 int             a[] = {1, 2, 3, 4};
 vector<int>     v;

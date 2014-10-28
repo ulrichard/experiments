@@ -16,7 +16,7 @@ private:
 
 int main()
 {
-    const my_path dir = {"home", "richi", "sourcecode", "pointline"};
+    const my_path dir{"home", "richi", "sourcecode", "pointline"};
 
     return 0;
 }
