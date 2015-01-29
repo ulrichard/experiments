@@ -1,23 +1,23 @@
 #include <vector>
 #include <map>
 #include <string>
+#include <iostream>
 
-class my_path
+struct my_path
 {
-public:
     my_path(std::initializer_list<std::string> dirs)
     {
         for(auto dir : dirs)
             m_Dir += "/" + dir;
     }
-private:
+
     std::string m_Dir;
 };
 
 int main()
 {
     const my_path dir{"home", "richi", "sourcecode", "pointline"};
-
+    std::cout << dir.m_Dir;
     return 0;
 }
 

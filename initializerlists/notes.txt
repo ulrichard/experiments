@@ -17,6 +17,7 @@
 - nested would be nice, but could be pair or list
 - const type is important -> needs to match exactly
 - assign=, () {}
+- if used like this, it's not really satisfactory
 
 ** std::map initializer_list constructor
 - shwos the type requirement we just found out
