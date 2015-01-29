@@ -1,0 +1,22 @@
+
+** containers 98
+- if you want the container to be const, you need a separate function
+
+** named initializer liists
+- const is important
+- not really nice, but shows how the mechanism works
+
+** containers 11
+- put the initializer lists to work
+- if the compier can deduce the types, we can use the nice syntax
+- The containers can be const now
+
+** initialization list constructor
+- you can use initialization list constructor in your own types
+- overly simple example
+
+** what the celecs say
+- let the audience read
+
+
+

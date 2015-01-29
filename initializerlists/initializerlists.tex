@@ -20,12 +20,15 @@
 
 \author{Richard Ulrich}
 \title{C++11 initializer lists}
+\subtitle{unified initialization of containers and other objects}
 %\setbeamercovered{transparent} 
 %\setbeamertemplate{navigation symbols}{} 
-%\logo{cubx_logo.png} 
+%\logo{cubx.png} 
 \institute{cubx Software AG} 
 %\date{} 
-%\subject{} 
+\subject{BORM developer day} 
+\titlegraphic{\includegraphics[width=2cm]{cubx.png}}
+
 \begin{document}
 
 \begin{frame}
@@ -38,6 +41,10 @@
 
 \begin{frame}{container initialization in C++98}
 \lstinputlisting[language=C++]{@initializerlists_SOURCE_DIR@/container_98.cpp}
+\end{frame}
+
+\begin{frame}{named initializer lists}
+\lstinputlisting[language=C++]{@initializerlists_SOURCE_DIR@/named_initializerlists.cpp}
 \end{frame}
 
 \begin{frame}{container initialization in C++11}
@@ -61,6 +68,14 @@ In other cases, including especially everywhere that you would have used ( ) par
 
 \begin{frame}{Herb Sutter code part 2}
 \lstinputlisting[language=C++]{@initializerlists_SOURCE_DIR@/sutter2.cpp}
+\end{frame}
+
+\begin{frame}{References and code}
+All code presented in this document can be found at:\\
+\href{https://github.com/ulrichard/experiments/tree/master/initializerlists}{https://github.com/ulrichard/experiments/tree/master/initializerlists}\\
+\\[0.5cm]
+It was written using vi, LaTeX and cmake to make sure the code actually compiles. For more details see:\\
+\href{http://blog.ulrichard.ch/?p=1406}{http://blog.ulrichard.ch/?p=1406}
 \end{frame}
 
 \end{document}

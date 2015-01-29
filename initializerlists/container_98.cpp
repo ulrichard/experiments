@@ -7,6 +7,7 @@ int main()
     const int ia[] = {1, 2, 3};
 
     std::vector<int> vi;
+    vi.reserve(3);
     vi.push_back(1);
     vi.push_back(2);
     vi.push_back(3);

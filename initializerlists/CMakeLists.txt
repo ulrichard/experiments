@@ -19,11 +19,23 @@ SET_TARGET_PROPERTIES(container_11 PROPERTIES
     COMPILE_FLAGS -std=c++11
 )
 
+ADD_EXECUTABLE(named_initializerlists
+	named_initializerlists.cpp
+)
+SET_TARGET_PROPERTIES(named_initializerlists PROPERTIES
+    COMPILE_FLAGS -std=c++11
+)
+
 ADD_EXECUTABLE(constructor
 	constructor.cpp
 )
 SET_TARGET_PROPERTIES(constructor PROPERTIES
     COMPILE_FLAGS -std=c++11
+)
+
+ADD_CUSTOM_COMMAND(TARGET constructor POST_BUILD
+    COMMAND ${CMAKE_COMMAND}
+    ARGS -E copy ${initializerlists_SOURCE_DIR}/cubx.png ${PROJECT_BINARY_DIR}/cubx.png
 )
 
 # http://www.cmake.org/Wiki/CMakeUserUseLATEX
@@ -32,8 +44,4 @@ ADD_LATEX_DOCUMENT(initializerlists.tex
     CONFIGURE initializerlists.tex 
     DEFAULT_PDF
 )
-
-
-
-
 
