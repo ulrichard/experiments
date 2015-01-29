@@ -5,5 +5,5 @@ Written using vim, LaTeX and cmake to make sure the code actually compiles. For 
 http://blog.ulrichard.ch/?p=1406
 
 You can find the pdf output file at:
-https://github.com/ulrichard/experiments/releases/download/initlist_0.2/initializerlists.pdf
+https://github.com/ulrichard/experiments/releases/download/initlist_0.3/initializerlists.pdf
  
