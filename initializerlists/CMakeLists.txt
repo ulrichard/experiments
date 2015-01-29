@@ -26,6 +26,13 @@ SET_TARGET_PROPERTIES(named_initializerlists PROPERTIES
     COMPILE_FLAGS -std=c++11
 )
 
+ADD_EXECUTABLE(std_initializer_list
+	std_initializer_list.cpp
+)
+SET_TARGET_PROPERTIES(std_initializer_list PROPERTIES
+    COMPILE_FLAGS -std=c++11
+)
+
 ADD_EXECUTABLE(constructor
 	constructor.cpp
 )

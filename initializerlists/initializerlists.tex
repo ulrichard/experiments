@@ -43,8 +43,31 @@
 \lstinputlisting[language=C++]{@initializerlists_SOURCE_DIR@/container_98.cpp}
 \end{frame}
 
+\begin{frame}{std::initializer\_list}
+\href{http://en.cppreference.com/w/cpp/utility/initializer\_list}{http://en.cppreference.com/w/cpp/utility/initializer\_list} :
+\\[0.2cm]
+An object of type std::initializer\_list\textless T\textgreater is a lightweight proxy object that provides access to an array of objects of type const T.
+\pause
+\\[0.2cm]
+A std::initializer\_list object is automatically constructed when:
+\begin{itemize}
+\item a braced-init-list is used in list-initialization, including function-call list initialization and assignment expressions
+\item a braced-init-list is bound to auto, including in a ranged for loop 
+\end{itemize}
+\pause
+Initializer lists may be implemented as a pair of pointers or pointer and length. Copying a std::initializer\_list does not copy the underlying objects. 
+\end{frame}
+
+\begin{frame}{public interface}
+\lstinputlisting[language=C++]{@initializerlists_SOURCE_DIR@/std_initializer_list.h}
+\end{frame}
+
 \begin{frame}{named initializer lists}
 \lstinputlisting[language=C++]{@initializerlists_SOURCE_DIR@/named_initializerlists.cpp}
+\end{frame}
+
+\begin{frame}{std::map initializer\_list constructor}
+\lstinputlisting[language=C++]{@initializerlists_SOURCE_DIR@/map_interface.h}
 \end{frame}
 
 \begin{frame}{container initialization in C++11}
@@ -56,9 +79,23 @@
 \end{frame}
 
 \begin{frame}{What the celebrities say}
+\textbf{Bjarne Stroustrup} (\href{http://www.stroustrup.com/C++11FAQ.html\#init-list}{www.stroustrup.com/C++11FAQ.html\#init-list})
+\begin{itemize}
+\item Initializer lists are not just for arrays any more. The mechanism for accepting a \{\}-list is a function (often a constructor) accepting an argument of type std::initializer\_list\textless T\textgreater .\\
+\pause
+\item The initializer list can be of arbitrary length, but must be homogeneous (all elements must be of a the template argument type, T, or convertible to T).\\
+\pause
+\item A constructor that takes a single argument of type std::initializer\_list is called an initializer-list constructor.\\
+\pause
+\item The standard library containers, string, and regex have initializer-list constructors, assignment, etc. An initializer-list can be used as a range, e.g. in a range for statement.
+\end{itemize}
+\end{frame}
+
+\begin{frame}{What the celebrities say}
 \textbf{Herb Sutter} (\href{http://herbsutter.com/elements-of-modern-c-style}{herbsutter.com/elements-of-modern-c-style})\\
 
 \emph{What hasn’t changed}: When initializing a local variable whose type is non-POD or auto, continue using the familiar = syntax without extra curly braces.\\
+\pause
 In other cases, including especially everywhere that you would have used ( ) parentheses when constructing an object, prefer using { } braces instead. Using braces avoids several potential problems: you can’t accidentally get narrowing conversions (e.g., float to int), you won’t occasionally accidentally have uninitialized POD member variables or arrays, and you’ll avoid the occasional C++98 surprise that your code compiles but actually declares a function rather than a variable because of a declaration ambiguity in C++’s grammar – what Scott Meyers famously calls “C++’s most vexing parse.” There’s nothing vexing about the new style.
 \end{frame}
 
@@ -74,8 +111,10 @@ In other cases, including especially everywhere that you would have used ( ) par
 All code presented in this document can be found at:\\
 \href{https://github.com/ulrichard/experiments/tree/master/initializerlists}{https://github.com/ulrichard/experiments/tree/master/initializerlists}\\
 \\[0.5cm]
-It was written using vi, LaTeX and cmake to make sure the code actually compiles. For more details see:\\
-\href{http://blog.ulrichard.ch/?p=1406}{http://blog.ulrichard.ch/?p=1406}
+It was written using vim, LaTeX and cmake to make sure the code actually compiles. For more details see:\\
+\href{http://blog.ulrichard.ch/?p=1406}{http://blog.ulrichard.ch/?p=1406}\\
+\\[0.5cm]
+Thanks for listening
 \end{frame}
 
 \end{document}

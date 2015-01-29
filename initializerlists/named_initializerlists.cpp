@@ -18,6 +18,7 @@ int main()
     typedef std::initializer_list<std::pair<const int, std::string>> InitListMap; // wouldn't work without the const
     InitListMap il2 = {{1, "one"}, {2, "two"}};
     const std::map<int, std::string> mis2{il2};
+
     return 0;
 }
 

@@ -1,21 +1,38 @@
+** C++11 initializer lists
+- welcome
 
-** containers 98
-- if you want the container to be const, you need a separate function
+** container initialization in C++98
+- Can be overly verbose of you just want a container with a known content.
+- If you want the container to be const, you need a separate function.
 
-** named initializer liists
-- const is important
+** std::initializer_list
+- reference
+
+** public interface
+- private constructor accessible by the compiler
+
+** named initializer lists
+- let's assign initializer lists to variables
 - not really nice, but shows how the mechanism works
+- nested would be nice, but could be pair or list
+- const type is important -> needs to match exactly
+- assign=, () {}
+
+** std::map initializer_list constructor
+- shwos the type requirement we just found out
+- the const in pair<const _Key is important
 
 ** containers 11
 - put the initializer lists to work
-- if the compier can deduce the types, we can use the nice syntax
+- if the compiler can deduce the types, we can use the nice syntax
 - The containers can be const now
 
 ** initialization list constructor
 - you can use initialization list constructor in your own types
 - overly simple example
+- shows usage in a range for loop
 
-** what the celecs say
+** what the celebs say
 - let the audience read
 
 
