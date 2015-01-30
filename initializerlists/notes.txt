@@ -17,6 +17,7 @@
 - nested would be nice, but could be pair or list
 - const type is important -> needs to match exactly
 - assign=, () {}
+- is this really an improvement over the 98 slide?
 - if used like this, it's not really satisfactory
 
 ** std::map initializer_list constructor
