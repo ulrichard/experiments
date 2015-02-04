@@ -65,12 +65,16 @@ Initializer lists may be implemented as a pair of pointers or pointer and length
 \lstinputlisting[language=C++]{@initializerlists_SOURCE_DIR@/std_initializer_list.h}
 \end{frame}
 
-\begin{frame}{named initializer lists}
+\begin{frame}{named initializer lists - part 1}
 \lstinputlisting[language=C++]{@initializerlists_SOURCE_DIR@/named_initializerlists.cpp}
 \end{frame}
 
 \begin{frame}{std::map initializer\_list constructor}
 \lstinputlisting[language=C++]{@initializerlists_SOURCE_DIR@/map_interface.h}
+\end{frame}
+
+\begin{frame}{named initializer lists - part 2}
+\lstinputlisting[language=C++]{@initializerlists_SOURCE_DIR@/named_initializerlists2.cpp}
 \end{frame}
 
 \begin{frame}{container initialization in C++11}
@@ -85,7 +89,6 @@ Initializer lists may be implemented as a pair of pointers or pointer and length
 Running the test program produces the following output:
 \\[0.4cm]
 \textbf{./constructor}
-\pause
 \lstinputlisting[]{@PROJECT_BINARY_DIR@/constructor.txt}
 \end{frame}
 
@@ -107,7 +110,13 @@ Running the test program produces the following output:
 
 \emph{What hasn’t changed}: When initializing a local variable whose type is non-POD or auto, continue using the familiar = syntax without extra curly braces.\\
 \pause
-In other cases, including especially everywhere that you would have used ( ) parentheses when constructing an object, prefer using { } braces instead. Using braces avoids several potential problems: you can’t accidentally get narrowing conversions (e.g., float to int), you won’t occasionally accidentally have uninitialized POD member variables or arrays, and you’ll avoid the occasional C++98 surprise that your code compiles but actually declares a function rather than a variable because of a declaration ambiguity in C++’s grammar – what Scott Meyers famously calls “C++’s most vexing parse.” There’s nothing vexing about the new style.
+In other cases, including especially everywhere that you would have used ( ) parentheses when constructing an object, prefer using { } braces instead. Using braces avoids several potential problems: 
+\pause
+you can’t accidentally get narrowing conversions (e.g., float to int), 
+\pause
+you won’t occasionally accidentally have uninitialized POD member variables or arrays, 
+\pause
+and you’ll avoid the occasional C++98 surprise that your code compiles but actually declares a function rather than a variable because of a declaration ambiguity in C++’s grammar – what Scott Meyers famously calls “C++’s most vexing parse.” There’s nothing vexing about the new style.
 \end{frame}
 
 \begin{frame}{Herb Sutter code part 1}
@@ -118,11 +127,27 @@ In other cases, including especially everywhere that you would have used ( ) par
 \lstinputlisting[language=C++]{@initializerlists_SOURCE_DIR@/sutter2.cpp}
 \end{frame}
 
+\begin{frame}{Real world example - Language dependent file classes}
+\lstinputlisting[language=C++]{@initializerlists_SOURCE_DIR@/realworld.h}
+\end{frame}
+
+\begin{frame}{Real world example - C++98 - separate function}
+\lstinputlisting[language=C++]{@initializerlists_SOURCE_DIR@/realworld98.cpp}
+\end{frame}
+
+\begin{frame}{Real world example - C++11 lambda}
+\lstinputlisting[language=C++]{@initializerlists_SOURCE_DIR@/realworld11lambda.cpp}
+\end{frame}
+
+\begin{frame}{Real world example - C++11 initializerlist}
+\lstinputlisting[language=C++]{@initializerlists_SOURCE_DIR@/realworld11initializerlist.cpp}
+\end{frame}
+
 \begin{frame}{References and code}
 All code presented in this document can be found at:\\
 \href{https://github.com/ulrichard/experiments/tree/master/initializerlists}{https://github.com/ulrichard/experiments/tree/master/initializerlists}\\
 \\[0.5cm]
-It was written using vim, LaTeX and cmake to make sure the code actually compiles. The actual output of the test program was incorporated in the presentation. For more details see:\\
+It was written using vim, LaTeX and cmake to make sure the code actually compiles, and produces the exact output as presented. For more details see:\\
 \href{http://blog.ulrichard.ch/?p=1406}{http://blog.ulrichard.ch/?p=1406}\\
 \\[0.5cm]
 Thanks for listening

@@ -26,6 +26,13 @@ SET_TARGET_PROPERTIES(named_initializerlists PROPERTIES
     COMPILE_FLAGS -std=c++11
 )
 
+ADD_EXECUTABLE(named_initializerlists2
+	named_initializerlists2.cpp
+)
+SET_TARGET_PROPERTIES(named_initializerlists2 PROPERTIES
+    COMPILE_FLAGS -std=c++11
+)
+
 ADD_EXECUTABLE(std_initializer_list
 	std_initializer_list.cpp
 )
@@ -47,6 +54,27 @@ ADD_CUSTOM_COMMAND(TARGET constructor POST_BUILD
 ADD_CUSTOM_COMMAND(TARGET constructor POST_BUILD
     COMMAND ${CMAKE_COMMAND}
     ARGS -E copy ${initializerlists_SOURCE_DIR}/cubx.png ${PROJECT_BINARY_DIR}/cubx.png
+)
+
+ADD_EXECUTABLE(realworld98
+	realworld98.cpp
+)
+SET_TARGET_PROPERTIES(realworld98 PROPERTIES
+    COMPILE_FLAGS -std=c++98
+)
+
+ADD_EXECUTABLE(realworld11lambda
+	realworld11lambda.cpp
+)
+SET_TARGET_PROPERTIES(realworld11lambda PROPERTIES
+    COMPILE_FLAGS -std=c++11
+)
+
+ADD_EXECUTABLE(realworld11initializerlist
+	realworld11initializerlist.cpp
+)
+SET_TARGET_PROPERTIES(realworld11initializerlist PROPERTIES
+    COMPILE_FLAGS -std=c++11
 )
 
 # http://www.cmake.org/Wiki/CMakeUserUseLATEX

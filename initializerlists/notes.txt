@@ -4,27 +4,36 @@
 ** container initialization in C++98
 - Can be overly verbose of you just want a container with a known content.
 - If you want the container to be const, you need a separate function.
+- Arrays and structs always had nice initialization syntax. Wouldn't it be nice if we could use it with std containers?
+- libboost had the assign library since 2003 or so. But when I wanted to use it, I got template compilation errors.
 
 ** std::initializer_list
 - reference
 
 ** public interface
-- private constructor accessible by the compiler
+- the interesting constructor is private, thus callable only by the compiler
 
-** named initializer lists
+** named initializer lists part 1
 - let's assign initializer lists to variables
-- not really nice, but shows how the mechanism works
+- we have an initializer list for an in t vector. Assigning is easy.
+- for the map it is not as easy
 - nested would be nice, but could be pair or list
+- I have no example in my presentation, but nested initializer lists for nested containers are also possible.
+- If I showed the full error message, you would know, but do you have a clue?
+
+** std::map initializer_list constructor
+- shwos the type requirement
+- the const in pair<const _Key is important
+
+** named initializer lists part 2
 - const type is important -> needs to match exactly
 - assign=, () {}
 - is this really an improvement over the 98 slide?
+- not really nice, but shows how the mechanism works
 - if used like this, it's not really satisfactory
 
-** std::map initializer_list constructor
-- shwos the type requirement we just found out
-- the const in pair<const _Key is important
-
 ** containers 11
+- so let me show you how initializer lists are ment to be used
 - put the initializer lists to work
 - if the compiler can deduce the types, we can use the nice syntax
 - The containers can be const now
@@ -34,8 +43,26 @@
 - overly simple example
 - shows usage in a range for loop
 
+** stdout of the constructor test program
+- I didn't write this, the actual program did
+
 ** what the celebs say
 - let the audience read
 
+** real world example header 
+- In the configuration module of PointLine, we have some file classes.
+- And then we need to know which of those need to be handled separately by language.
+- For this we have a static const set in the Directories class.
+
+** c++ 98
+- need a separate function to fill the static const
+
+** C++11 lambda
+- in c++11 instead of a named function, we could use an unnamed functino -> a lambda.
+- no separate function but comparable ammount of boilerplate code
+- code is in one place
+
+** C++11 initializer list
+- minimal
 
 
