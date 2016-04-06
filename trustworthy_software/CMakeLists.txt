@@ -5,13 +5,22 @@ SET(CMAKE_MODULE_PATH ${trustworthy_software_SOURCE_DIR} ${CMAKE_MODULE_PATH})
 
 FIND_PACKAGE(LATEX REQUIRED)
 
+MACRO(CopyFileToBuildDir fileName)
+    EXECUTE_PROCESS(
+        COMMAND ${CMAKE_COMMAND} -E copy ${trustworthy_software_SOURCE_DIR}/${fileName} ${PROJECT_BINARY_DIR}/${fileName}
+    )
+ENDMACRO(CopyFileToBuildDir)
 
-EXECUTE_PROCESS(
-    COMMAND ${CMAKE_COMMAND} -E copy ${ipfs_SOURCE_DIR}/borm_logo.jpg ${PROJECT_BINARY_DIR}/borm_logo.jpg
-)
-EXECUTE_PROCESS(
-    COMMAND ${CMAKE_COMMAND} -E copy ${ipfs_SOURCE_DIR}/skype.png ${PROJECT_BINARY_DIR}/skype.png
-)
+CopyFileToBuildDir(borm_logo.jpg)
+CopyFileToBuildDir(pointLine_signature.png)
+CopyFileToBuildDir(certificate_authority_hierarchies.png)
+CopyFileToBuildDir(isp_malware.png)
+CopyFileToBuildDir(tor_exit_windows_update.png)
+CopyFileToBuildDir(sha1.png)
+CopyFileToBuildDir(skype.png)
+CopyFileToBuildDir(backdoor_criminals.png)
+CopyFileToBuildDir(great_canon.png)
+CopyFileToBuildDir(obsolete_signature.png)
 
 # http://www.cmake.org/Wiki/CMakeUserUseLATEX
 INCLUDE(UseLATEX)
