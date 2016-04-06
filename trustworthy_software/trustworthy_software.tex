@@ -38,7 +38,7 @@
 %\tableofcontents
 %\end{frame}
 
-\begin{frame}{warning when installing PointLine}
+\begin{frame}{Warning when installing PointLine}
 \includegraphics[scale=0.5]{obsolete_signature.png}
 % some of you might have noticed for the first time that we sign our installers
 % when this warning started appearing at the start of 2016 upon trying to 
@@ -49,6 +49,7 @@
 \includegraphics[scale=0.38]{pointLine_signature.png}
 % you can inspect the signature yourself by right-clicking a program file or dll
 % The important part is : "This digital signature is OK."
+% Who in the audience actually checked a signature before installing a software?
 \end{frame}
 
 \begin{frame}{How code signing works}
@@ -87,14 +88,14 @@
 
 \begin{frame}{How do we know the signature is from whom it says}
 \begin{itemize}
-\item Borm bought a certificate from a certificate authority.
-\item The certificate authority checked a trade register document.
-\item The certificate authority bought a certificate from a root authority.
+\item Borm bought a certificate from a certificate authority
+\item The certificate authority checked a trade register document
+\item The certificate authority bought a certificate from a root authority
 \item Root certificates are shipped with the operating system
 \end{itemize}
 \end{frame}
 
-\begin{frame}{certificate authority hierarchies}
+\begin{frame}{Certificate authority hierarchies}
 \includegraphics[scale=0.5]{certificate_authority_hierarchies.png}
 % source : https://technet.microsoft.com/en-us/library/cc962065.aspx
 \end{frame}
@@ -102,26 +103,26 @@
 \begin{frame}{What attacks does the signature protect against}
 \begin{itemize}
 \item Tampering with the licensing mechanism and selling as original
-\item Tampering with the software to make it buggy
+\item Tampering with the software to make it buggy for discrediting
 \item Bundling malware by copycat publisher (angry bird clones)
 \item Bundling malware by proxy or man in the middle (ISP, public WiFi, tor exit nodes, great firewall of china)
 \item Bundling malware by download site (sourceforge)
 \end{itemize}
 \end{frame}
 
-\begin{frame}{definition of malware}
+\begin{frame}{Definition of malware}
 \emph{Malware}, short for malicious software, is any software used to disrupt computer operations, gather sensitive information, gain access to private computer systems, or display unwanted advertising.
 \\[0.2cm]
-Malware is defined by its malicious intent, acting against the requirements of the computer user, and does not include software that causes unintentional harm due to some deficiency.
+\emph{Malware} is defined by its malicious intent, acting against the requirements of the computer user, and does not include software that causes unintentional harm due to some deficiency.
 \\[0.2cm]
 source: \href{https://en.wikipedia.org/wiki/Malware}{https://en.wikipedia.org/wiki/Malware}
 % the border between malware and crapware is not always clear
 \end{frame}
 
 \begin{frame}{definition of backdoor}
-A backdoor is a method, often secret, of bypassing normal authentication in a product, computer system, cryptosystem or algorithm etc.
+A \emph{backdoor} is a method, often secret, of bypassing normal authentication in a product, computer system, cryptosystem or algorithm etc.
 \\[0.2cm]
-Backdoors are often used for securing unauthorized remote access to a computer, or obtaining access to plaintext in cryptographic systems.
+\emph{Backdoors} are often used for securing unauthorized remote access to a computer, or obtaining access to plaintext in cryptographic systems.
 \\[0.2cm]
 source: \href{https://en.wikipedia.org/wiki/Backdoor\textunderscore(computing)}{https://en.wikipedia.org/wiki/Backdoor\_(computing)}
 \end{frame}
@@ -130,26 +131,28 @@ source: \href{https://en.wikipedia.org/wiki/Backdoor\textunderscore(computing)}{
 \includegraphics[scale=0.28]{isp_malware.png}
 \end{frame}
 
-\begin{frame}{tor exit node tamper windows update}
+\begin{frame}{Tor exit node tamper windows update}
 \includegraphics[scale=0.3]{tor_exit_windows_update.png}
+% Compromised windows installer updates detected by signature verification.
+% But the errormessage is unclear, so that the user most likely just continues.
 \end{frame}
 
-\begin{frame}{injecting js for ddos}
+\begin{frame}{Injecting js for ddos}
 \includegraphics[scale=0.2]{great_canon.png}
 %http://arstechnica.com/security/2015/04/meet-great-cannon-the-man-in-the-middle-weapon-china-used-on-github/
 \end{frame}
 
 \begin{frame}{What attacks does code signing not protect against}
 \begin{itemize}
-\item Weak hash or crypto used for the signature            % we only recently switched to SHA256 hash
-\item Hacker sneaking backdoors into source code            % sane version control is a protection
-\item Coerced employee sneaking backdoors into source code  % good code reviews are a protection
-\item Publisher intentionally adding backdoors              % skype story later
-\item Compromised build environment (computer)              % very serious
-\item Compromised build tools (compiler)                    % very serious
-\item Bundling malware by publisher (oracle java)
+\item Weak hash or crypto used for the signature
+\item Hacker sneaking malware into source code
+\item Coerced employee sneaking malware into source code
+\item Publisher intentionally adding malware
+\item Compromised build environment (computer)
+\item Compromised build tools (compiler)
+\item Bundling malware by publisher
 \item Insecure coding practices
-\item Bribed timestamping provider                          % the least serious
+\item Bribed timestamping provider
 \item Compromised certificate authority
 \item Private key stolen or unintentionally published
 \end{itemize}
@@ -222,7 +225,7 @@ The build host is the one component you still have to trust with traditional ope
 \\[0.2cm]
 \begin{itemize}
 \item Not much you can do
-\item Trust hwomever sold it to you
+\item Trust whomever sold it to you
 \item Use a well reviewed open source tool chain
 \end{itemize}
 % hard to defend against
@@ -245,7 +248,7 @@ The build host is the one component you still have to trust with traditional ope
 \pause
 \emph{As the user:}
 \begin{itemize}
-\item I try not to use software if I have reason to beleve it is compromised % even if it is forced on us
+\item I try not to use software, if I have reason to beleve it is compromised % even if it is forced on us
 \item There are always plenty of good alternatives
 \end{itemize}
 \end{frame}
@@ -273,6 +276,9 @@ This is probably the least severe case here, but still not wanted.
 \item Proof of existence can be a hash of a document published in a newspaper
 \item There is a service called proof of existence that stores the hash on the BitCoin blockchain
 \end{itemize}
+% Nobody would even care if PointLine had a wrong timestamp in the signature.
+% The warning on the first slide could be avoided with a 2015 timestamp.
+% But it's much easier to buy a new certificate.
 \end{frame}
 
 \begin{frame}{Compromised certificate authority}
