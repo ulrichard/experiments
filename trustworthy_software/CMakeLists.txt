@@ -20,6 +20,13 @@ CopyFileToBuildDir(sha1.png)
 CopyFileToBuildDir(skype.png)
 CopyFileToBuildDir(backdoor_criminals.png)
 CopyFileToBuildDir(great_canon.png)
+CopyFileToBuildDir(apple_toolchain.png)
+CopyFileToBuildDir(diginotar.png)
+CopyFileToBuildDir(certificate_authority_compromised.png)
+CopyFileToBuildDir(debian_qa.png)
+CopyFileToBuildDir(web_of_trust.png)
+CopyFileToBuildDir(trust_models.jpeg)
+CopyFileToBuildDir(zooko_triangle.png)
 CopyFileToBuildDir(obsolete_signature.png)
 
 # http://www.cmake.org/Wiki/CMakeUserUseLATEX

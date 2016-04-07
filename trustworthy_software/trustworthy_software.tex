@@ -43,6 +43,17 @@
 % some of you might have noticed for the first time that we sign our installers
 % when this warning started appearing at the start of 2016 upon trying to 
 % install PointLine
+% Who in the audience saw this warning?
+% Who knows why it appeared?
+\end{frame}
+
+\begin{frame}{Table of contents}
+\begin{itemize}
+\item How code signing works
+\item What the signature asserts
+\item What attacks can the signature protect against
+\item What attacks does code signing not protect against
+\end{itemize}
 \end{frame}
 
 \begin{frame}{PointLine signature}
@@ -145,9 +156,9 @@ source: \href{https://en.wikipedia.org/wiki/Backdoor\textunderscore(computing)}{
 \begin{frame}{What attacks does code signing not protect against}
 \begin{itemize}
 \item Weak hash or crypto used for the signature
-\item Hacker sneaking malware into source code
-\item Coerced employee sneaking malware into source code
-\item Publisher intentionally adding malware
+\item Hacker sneaking backdoor into source code
+\item Coerced employee sneaking backdoor into source code
+\item Publisher intentionally adding backdoor
 \item Compromised build environment (computer)
 \item Compromised build tools (compiler)
 \item Bundling malware by publisher
@@ -156,12 +167,17 @@ source: \href{https://en.wikipedia.org/wiki/Backdoor\textunderscore(computing)}{
 \item Compromised certificate authority
 \item Private key stolen or unintentionally published
 \end{itemize}
+\\[0.2cm]
+% Let's make a distinction here
+% Hackers select their targets by evaluating return on investment
+Which of these are targeted vs. automated attacks
 % how could we fix these problems?
 % let's look at them one at a time.
 \end{frame}
 
 \begin{frame}{Weak hash or crypto used for the signature}
 \includegraphics[scale=0.27]{sha1.png}
+% The article is from last october
 % This is what triggered the warning on the first slide
 % It was relatively easy to fix
 % We bought a new certificate and adapted the build process
@@ -179,27 +195,55 @@ source: \href{https://en.wikipedia.org/wiki/Backdoor\textunderscore(computing)}{
 \emph{But how can the user be confident enough?}
 \begin{itemize}
 \item Reputation                    % not enough, but ofthen that's all you get
-\item Promises                      % really?
+\item Promises                      % really? Coerced publisher will deny
 \item Independent code reviews      % doesn't fit well with agile development
 \item OpenSource                    % convincing - the only way you can really trust your software
 \end{itemize}
+% Beleve is for the church. Being able to verify something enables trust.
 \end{frame}
 
-\begin{frame}{skype backdoor}
+\begin{frame}{Real world example of a backdoor}
 \includegraphics[scale=0.27]{skype.png}
 % no big surprise from that company
 \end{frame}
 
-\begin{frame}{backdoors for criminals}
+\begin{frame}{Criminals love backdoors}
 \includegraphics[scale=0.28]{backdoor_criminals.png}
 %http://www.networkworld.com/article/2944866/security0/law-enforcement-backdoors-open-corporate-networks-to-criminals.html
 % the thing with backdoors is that they will be found and used also by criminals
 \end{frame}
 
+\begin{frame}{How small can a backdoor be}
+OpenSSH 3.0.2 (CVE-2002-0083)\\
+exploitable security bug (privilege escalation: \emph{user can get root}) 
+\lstinputlisting[language=C]{@trustworthy_software_SOURCE_DIR@/small_backdoor.c}
+\end{frame}
+
+\begin{frame}{Resulting difference in the binary}
+What is the difference between \textcolor{red}{if (a \textgreater b)} and \textcolor{mygreen}{if (a \textgreater= b)} in x86 assembly? 
+\begin{flushleft}
+\begin{table}[]
+\begin{tabular}{| l | l | l |}
+\hline
+C        & if (a \textcolor{red}{\textgreater} b) & if (a \textcolor{mygreen}{\textgreater=} b)   \\
+assembly & \textcolor{red}{JLE}                   & \textcolor{mygreen}{JL}                       \\
+opcode   & 0x7\textcolor{red}{E}                  & 0x7\textcolor{mygreen}{C}                     \\
+binary   & 011111\textcolor{red}{1}0              & 011111\textcolor{mygreen}{0}0                 \\
+\hline
+\end{tabular}
+\end{table}
+\end{flushleft}
+\emph{A single bit!}
+\end{frame}
+
 \begin{frame}{Compromised build environment}
-Unlikely but very serious\\
-The build host is the one component you still have to trust with traditional open source distributions. % so far
+\begin{itemize}
+\item Unlikely but very serious\\
+\item An attack would have to be targeted\\ % and we're an unlikely target
+\item The build host is the one component you still have to trust even with traditional open source distributions. % so far
+\end{itemize}
 \\[0.2cm]
+\pause
 \emph{Problems:}
 \begin{itemize}
 \item Hard to detect
@@ -216,8 +260,45 @@ The build host is the one component you still have to trust with traditional ope
 \end{itemize}
 \end{frame}
 
-\begin{frame}{Debian reproducible builds}
-%ToDo : add content
+\begin{frame}{Motivation for reproducible builds}
+With free software, anyone can inspect the source code for malicious flaws. But Debian provide binary packages to its users. The idea of “deterministic” or “reproducible” builds is to empower anyone to verify that no flaws have been introduced during the build process by reproducing byte-for-byte identical binary packages from a given source. \\
+source: \href{https://wiki.debian.org/ReproducibleBuilds/About}{https://wiki.debian.org/ReproducibleBuilds/About}
+\\[0.1cm]
+We often speak as if open source software can't contain backdoors or malware because its source code is "published", rendering any potentially malicious code visible. But real-world software release processes have major transparency gaps that aren't addressed by most existing open source development practices. The biggest such gap is that compilation and packaging processes aren't reproducible. Trying to recreate these processes typically yields a different result. That means users can't directly verify that the binary releases they download and use were actually created from the purportedly corresponding source trees.\\
+source: \href{https://air.mozilla.org/why-and-how-of-reproducible-builds-distrusting-our-own-infrastructure-for-safer-software-releases/}{https://air.mozilla.org/why-and-how-of-reproducible-builds-distrusting-our-own-infrastructure-for-safer-software-releases/}
+\end{frame}
+
+\begin{frame}{Debian build procedure}
+\begin{itemize}
+\item Upstream author releases a source tarball with signature
+\pause
+\item Debian developer creates a source package which:
+\begin{itemize}
+\item Specifies where the original sources and signature can be downloaded
+\item Specifies how the package is built
+\item Might add some debian specific patches
+\item Includes the public key of the upstream author in the package
+\item Signs the source package and uploads it to the repository
+\end{itemize}
+\pause
+\item Build servers:
+\begin{itemize}
+\item Download the source package and the original tarbal
+\item Verify both signatures
+\item Apply the patches
+\item Build as instructed
+\item Create a binary package
+\item Sign the binary package and uploads it to the repository
+\end{itemize}
+\pause
+\item Binary packages from multiple build servers are compared
+\item Currently 87.6\% of debian packages build reproducibly for amd64
+\end{itemize}
+% Imagine how much harder it would be for VW to roll out cheating emission controls with a process like this
+\end{frame}
+
+\begin{frame}{Package overview}
+\includegraphics[scale=0.33]{debian_qa.png}
 \end{frame}
 
 \begin{frame}{Compromised build tools}
@@ -231,11 +312,16 @@ The build host is the one component you still have to trust with traditional ope
 % hard to defend against
 \end{frame}
 
+\begin{frame}{This is not just theory}
+\includegraphics[scale=0.23]{apple_toolchain.png}
+\end{frame}
+
 \begin{frame}{Bundling malware by publisher}
 \emph{Examples:}
 \begin{itemize}
 \item Oracle Java
 \item Compression tool served by Npackd % a package manager for windows
+\item Email offers if you ever published an Android app
 \end{itemize}
 \\[0.2cm]
 \pause
@@ -249,6 +335,9 @@ The build host is the one component you still have to trust with traditional ope
 \emph{As the user:}
 \begin{itemize}
 \item I try not to use software, if I have reason to beleve it is compromised % even if it is forced on us
+\begin{itemize}
+\item Or if the company uses other abusive practices such as vendor-lock-in
+\end{itemize}
 \item There are always plenty of good alternatives
 \end{itemize}
 \end{frame}
@@ -272,21 +361,67 @@ The build host is the one component you still have to trust with traditional ope
 \begin{frame}{Bribed timestamping provider}
 This is probably the least severe case here, but still not wanted.
 \\[0.2cm]
+Timestamp provider is a single point of failure.
+\\[0.2cm]
+More secure methods, you can prove something existed at a certain date.
+\\[0.2cm]
+\pause
 \begin{itemize}
-\item Proof of existence can be a hash of a document published in a newspaper
+\item Create a hash of a document and publish it in a newspaper
+\pause
 \item There is a service called proof of existence that stores the hash on the BitCoin blockchain
 \end{itemize}
 % Nobody would even care if PointLine had a wrong timestamp in the signature.
 % The warning on the first slide could be avoided with a 2015 timestamp.
 % But it's much easier to buy a new certificate.
+% BitCoin's BlockChain is a tamper resistant distributed consensus system
 \end{frame}
 
 \begin{frame}{Compromised certificate authority}
-%ToDo : add content
+\includegraphics[scale=0.28]{diginotar.png}
+\end{frame}
+
+\begin{frame}{Compromised certificate authority}
+\includegraphics[scale=0.5]{certificate_authority_compromised.png}
+% First the compromise has to be noticed
+% Revoking the key invalidates also lots of legitimate certificates
+% Why do we have such a hierarchical structure in the first place?
+\end{frame}
+
+\begin{frame}{Trust models}
+\includegraphics[scale=1.0]{trust_models.jpeg}
+\end{frame}
+
+\begin{frame}{Web of trust}
+\includegraphics[scale=0.44]{web_of_trust.png}
+% Harder to maintain
+% More resilient
+% Bank with brass plate
 \end{frame}
 
 \begin{frame}{NameCoin}
-%ToDo : add content
+\emph{Namecoin} is a decentralized open source information registration and transfer system based on the Bitcoin cryptocurrency
+\begin{itemize}
+\item Domain names for .bit TLD
+\begin{itemize}
+\item Including TLS fingerprint
+\end{itemize}
+\item Identity information 
+\end{itemize}
+\\[0.2cm]
+\pause
+\emph{Zooko's triangle}: properties considered desirable for names of participants in a network protocol
+\begin{itemize}
+\item \emph{Human-meaningful}: Meaningfulness and memorability to the users
+\item \emph{Decentralized}: No need of a centralized authority for determining the meaning of a name
+\item \emph{Secure}: There is one, unique and specific entity to which the name applies
+\end{itemize}
+\\[0.2cm]
+\includegraphics[scale=0.2]{zooko_triangle.png}
+% essentially a secure key value store
+% name and TLS certificate are tied together
+% simple script for dyndns
+% after seeing this it seems strange that you have to buy the name and certificate from different entities with the legacy system
 \end{frame}
 
 \begin{frame}{Private key stolen or unintentionally published}
@@ -300,6 +435,17 @@ This is probably the least severe case here, but still not wanted.
 \end{itemize}
 \end{frame}
 
+\begin{frame}{Closing}
+All code presented in this document can be found at:\\
+\href{https://github.com/ulrichard/experiments/tree/master/trustworthy\textunderscoresoftware}{https://github.com/ulrichard/experiments/tree/master/trustworthy\_software}\\
+\\[0.5cm]
+It was written using vim, LaTeX and cmake. For more details see:\\
+\href{http://blog.ulrichard.ch/?p=1406}{http://blog.ulrichard.ch/?p=1406}\\
+\\[0.5cm]
+Thanks for listening
+\\[0.5cm]
+Do you have questions?
+\end{frame}
 
 \end{document}
 
