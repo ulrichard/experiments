@@ -76,7 +76,7 @@
 \begin{itemize}
 \item Create a digest (hash) of the binary
 \item Sign it with the private key
-\item Public key and certificate are attached to the signed binary
+\item Signature, public key and certificate are attached to the binary
 \end{itemize}
 \pause
 \\[0.2cm]
@@ -92,6 +92,7 @@
 \begin{frame}{What the signature asserts}
 \begin{itemize}
 \item Publisher assures that the software is genuine
+\item Certificate confirms that the publisher is who he says he is
 \item The file did not change since it was signed
 \item It was signed on the indicated day (timestamp)
 \end{itemize}
@@ -116,8 +117,14 @@
 \item Tampering with the licensing mechanism and selling as original
 \item Tampering with the software to make it buggy for discrediting
 \item Bundling malware by copycat publisher (angry bird clones)
-\item Bundling malware by proxy or man in the middle (ISP, public WiFi, tor exit nodes, great firewall of china)
-\item Bundling malware by download site (sourceforge)
+\item Bundling malware by proxy or man in the middle
+\begin{itemize}
+\item Internet Service Provider
+\item Public, hotel or corporate WiFi
+\item TOR exit nodes
+\item Great firewall of china
+\end{itemize}
+\item Bundling malware by download site
 \end{itemize}
 \end{frame}
 
@@ -151,6 +158,19 @@ source: \href{https://en.wikipedia.org/wiki/Backdoor\textunderscore(computing)}{
 \begin{frame}{Injecting js for ddos}
 \includegraphics[scale=0.2]{great_canon.png}
 %http://arstechnica.com/security/2015/04/meet-great-cannon-the-man-in-the-middle-weapon-china-used-on-github/
+\end{frame}
+
+\begin{frame}{Involuntarily vulnerable}
+\includegraphics[scale=0.28]{fortinet.png}
+% It doesn't have to be the operator of the network himself
+% A firewall with a known backdoor is an invitation for crooks
+\end{frame}
+
+\begin{frame}{SourceForge bundling malware}
+\includegraphics[scale=0.28]{sourceforge.png}
+% Was once the most popular and trusted site to host opensource projects
+% Is adware less problematic?
+% The screenshot indicates that there is a valid signature, but not from the publisher
 \end{frame}
 
 \begin{frame}{What attacks does code signing not protect against}
@@ -202,7 +222,7 @@ Which of these are targeted vs. automated attacks
 % Beleve is for the church. Being able to verify something enables trust.
 \end{frame}
 
-\begin{frame}{Real world example of a backdoor}
+\begin{frame}{Publisher intentionally adding backdoor}
 \includegraphics[scale=0.27]{skype.png}
 % no big surprise from that company
 \end{frame}
@@ -295,10 +315,13 @@ source: \href{https://air.mozilla.org/why-and-how-of-reproducible-builds-distrus
 \item Currently 87.6\% of debian packages build reproducibly for amd64
 \end{itemize}
 % Imagine how much harder it would be for VW to roll out cheating emission controls with a process like this
+% For the current stable release there were other priorities, but it will be one of the big points for the next one.
 \end{frame}
 
 \begin{frame}{Package overview}
 \includegraphics[scale=0.33]{debian_qa.png}
+% cardpeek has a reproducibility problem
+% some packages don't build on esotheric or experimental platforms such as ppc, hurd or kfreebsd
 \end{frame}
 
 \begin{frame}{Compromised build tools}
@@ -336,10 +359,19 @@ source: \href{https://air.mozilla.org/why-and-how-of-reproducible-builds-distrus
 \begin{itemize}
 \item I try not to use software, if I have reason to beleve it is compromised % even if it is forced on us
 \begin{itemize}
-\item Or if the company uses other abusive practices such as vendor-lock-in
+\item Or if the company uses other abusive practices such as
+\begin{itemize}
+\item Bribing or deception
+\item Vendor-lock-in
+\item Digital Rights Management
+\end{itemize}
 \end{itemize}
 \item There are always plenty of good alternatives
 \end{itemize}
+\end{frame}
+
+\begin{frame}{Bundling malware by publisher}
+\includegraphics[scale=0.3]{oracle.png}
 \end{frame}
 
 \begin{frame}{Insecure coding practices}
@@ -359,7 +391,7 @@ source: \href{https://air.mozilla.org/why-and-how-of-reproducible-builds-distrus
 \end{frame}
 
 \begin{frame}{Bribed timestamping provider}
-This is probably the least severe case here, but still not wanted.
+This is probably the least severe case here
 \\[0.2cm]
 Timestamp provider is a single point of failure.
 \\[0.2cm]
@@ -369,7 +401,7 @@ More secure methods, you can prove something existed at a certain date.
 \begin{itemize}
 \item Create a hash of a document and publish it in a newspaper
 \pause
-\item There is a service called proof of existence that stores the hash on the BitCoin blockchain
+\item There is a service called \emph{proof of existence} that stores the hash on the BitCoin blockchain
 \end{itemize}
 % Nobody would even care if PointLine had a wrong timestamp in the signature.
 % The warning on the first slide could be avoided with a 2015 timestamp.
@@ -385,18 +417,21 @@ More secure methods, you can prove something existed at a certain date.
 \includegraphics[scale=0.5]{certificate_authority_compromised.png}
 % First the compromise has to be noticed
 % Revoking the key invalidates also lots of legitimate certificates
+% Timestamps could play a more important role here
 % Why do we have such a hierarchical structure in the first place?
 \end{frame}
 
 \begin{frame}{Trust models}
 \includegraphics[scale=1.0]{trust_models.jpeg}
+% hierarchies introduce single points of failure
 \end{frame}
 
 \begin{frame}{Web of trust}
 \includegraphics[scale=0.44]{web_of_trust.png}
 % Harder to maintain
 % More resilient
-% Bank with brass plate
+% Trust is not just boolean, but can be calculated
+% Bank with brass plate with QR code of public key
 \end{frame}
 
 \begin{frame}{NameCoin}
@@ -425,6 +460,8 @@ More secure methods, you can prove something existed at a certain date.
 \end{frame}
 
 \begin{frame}{Private key stolen or unintentionally published}
+A private key is a very sensitive piece of information, and should be treated accodingly.
+\\[0.2cm]
 \begin{itemize}
 \item A surprising number of private keys were found in github repositories
 \item Never send a private key over unencrypted eMail % Reto has a story to this
