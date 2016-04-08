@@ -100,7 +100,7 @@
 
 \begin{frame}{How do we know the signature is from whom it says}
 \begin{itemize}
-\item Borm bought a certificate from a certificate authority
+\item Publisher bought a certificate from a certificate authority
 \item The certificate authority checked a trade register document
 \item The certificate authority bought a certificate from a root authority
 \item Root certificates are shipped with the operating system
@@ -132,8 +132,15 @@
 \emph{Malware}, short for malicious software, is any software used to disrupt computer operations, gather sensitive information, gain access to private computer systems, or display unwanted advertising.
 \\[0.2cm]
 \emph{Malware} is defined by its malicious intent, acting against the requirements of the computer user, and does not include software that causes unintentional harm due to some deficiency.
-\\[0.2cm]
+\\[0.1cm]
 source: \href{https://en.wikipedia.org/wiki/Malware}{https://en.wikipedia.org/wiki/Malware}
+\\[0.5cm]
+\pause
+My take on the distinction between malware, crapware, blowtware, adware:\\
+\\[0.1cm]
+\emph{There no is honor among thieves}\\
+\\[0.1cm]
+\emph{Ist der Ruf erst ruiniert, lebt es sich ganz ungeniert}
 % the border between malware and crapware is not always clear
 \end{frame}
 
@@ -155,7 +162,7 @@ source: \href{https://en.wikipedia.org/wiki/Backdoor\textunderscore(computing)}{
 % But the errormessage is unclear, so that the user most likely just continues.
 \end{frame}
 
-\begin{frame}{Injecting js for ddos}
+\begin{frame}{Injecting JavaScript for distributed denial of service}
 \includegraphics[scale=0.2]{great_canon.png}
 %http://arstechnica.com/security/2015/04/meet-great-cannon-the-man-in-the-middle-weapon-china-used-on-github/
 \end{frame}
@@ -169,6 +176,7 @@ source: \href{https://en.wikipedia.org/wiki/Backdoor\textunderscore(computing)}{
 \begin{frame}{SourceForge bundling malware}
 \includegraphics[scale=0.28]{sourceforge.png}
 % Was once the most popular and trusted site to host opensource projects
+% They not only hurt gimp, but completely discredited themselves
 % Is adware less problematic?
 % The screenshot indicates that there is a valid signature, but not from the publisher
 \end{frame}
@@ -231,6 +239,10 @@ Which of these are targeted vs. automated attacks
 \includegraphics[scale=0.28]{backdoor_criminals.png}
 %http://www.networkworld.com/article/2944866/security0/law-enforcement-backdoors-open-corporate-networks-to-criminals.html
 % the thing with backdoors is that they will be found and used also by criminals
+\end{frame}
+
+\begin{frame}{Once they have access to the network}
+\includegraphics[scale=0.28]{ransomware.png}
 \end{frame}
 
 \begin{frame}{How small can a backdoor be}
@@ -357,7 +369,8 @@ source: \href{https://air.mozilla.org/why-and-how-of-reproducible-builds-distrus
 \pause
 \emph{As the user:}
 \begin{itemize}
-\item I try not to use software, if I have reason to beleve it is compromised % even if it is forced on us
+\item Why a \emph{singing santa} app wants access to your private data?
+\item I try to avoid software, if I have reason to beleve it is compromised % even if it is forced on us
 \begin{itemize}
 \item Or if the company uses other abusive practices such as
 \begin{itemize}
