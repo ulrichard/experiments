@@ -194,7 +194,7 @@ void VectorAdderGPU::DoExec()
 		// Create memory buffers
         cl::Buffer bufferA = cl::Buffer(OCLAdder.Context(), CL_MEM_READ_ONLY | CL_MEM_COPY_HOST_PTR, vecSize_ * sizeof(cl_float), reinterpret_cast<void*>(&arrA[0]));
         cl::Buffer bufferB = cl::Buffer(OCLAdder.Context(), CL_MEM_READ_ONLY | CL_MEM_COPY_HOST_PTR, vecSize_ * sizeof(cl_float), reinterpret_cast<void*>(&arrB[0]));
-        cl::Buffer bufferC = cl::Buffer(OCLAdder.Context(), CL_MEM_WRITE_ONLY,                       vecSize_ * sizeof(cl_float), reinterpret_cast<void*>(&arrC[0]));
+        cl::Buffer bufferC = cl::Buffer(OCLAdder.Context(), CL_MEM_WRITE_ONLY | CL_MEM_USE_HOST_PTR, vecSize_ * sizeof(cl_float), reinterpret_cast<void*>(&arrC[0]));
 
         // Make kernel
         cl::Kernel kernel(OCLAdder.Program(), "VectorAddition");

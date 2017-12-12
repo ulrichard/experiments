@@ -78,7 +78,7 @@
 \item Buy a certificate for your public key
 \end{itemize}
 \pause
-\\[0.2cm]
+-\\
 \emph{Signing the software}
 \begin{itemize}
 \item Create a digest (hash) of the binary
@@ -86,7 +86,7 @@
 \item Signature, public key and certificate are attached to the binary
 \end{itemize}
 \pause
-\\[0.2cm]
+-\\
 \emph{Verifying the signature}
 \begin{itemize}
 \item Everybody with the public key can verify the signature
@@ -143,17 +143,17 @@
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \begin{frame}{Definition of malware}
-\emph{Malware}, short for malicious software, is any software used to disrupt computer operations, gather sensitive information, gain access to private computer systems, or display unwanted advertising.
-\\[0.2cm]
-\emph{Malware} is defined by its malicious intent, acting against the requirements of the computer user, and does not include software that causes unintentional harm due to some deficiency.
-\\[0.1cm]
-source: \href{https://en.wikipedia.org/wiki/Malware}{https://en.wikipedia.org/wiki/Malware}
-\\[0.5cm]
+\emph{Malware}, short for malicious software, is any software used to disrupt computer operations, gather sensitive information, gain access to private computer systems, or display unwanted advertising.\\
+-\\
+\emph{Malware} is defined by its malicious intent, acting against the requirements of the computer user, and does not include software that causes unintentional harm due to some deficiency.\\
+-\\
+source: \href{https://en.wikipedia.org/wiki/Malware}{https://en.wikipedia.org/wiki/Malware}\\
+-\\
 \pause
 My take on the distinction between malware, crapware, bloatware, adware, scareware:\\
-\\[0.1cm]
+-\\
 \emph{There no is honor among thieves}\\
-\\[0.1cm]
+-\\
 \emph{Ist der Ruf erst ruiniert, lebt es sich ganz ungeniert}
 \note[itemize]{
 \item If a publisher included adware, how do you know its just that
@@ -164,10 +164,10 @@ My take on the distinction between malware, crapware, bloatware, adware, scarewa
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \begin{frame}{definition of backdoor}
-A \emph{backdoor} is a method, often secret, of bypassing normal authentication in a product, computer system, cryptosystem or algorithm etc.
-\\[0.2cm]
-\emph{Backdoors} are often used for securing unauthorized remote access to a computer, or obtaining access to plaintext in cryptographic systems.
-\\[0.2cm]
+A \emph{backdoor} is a method, often secret, of bypassing normal authentication in a product, computer system, cryptosystem or algorithm etc.\\
+-\\
+\emph{Backdoors} are often used for securing unauthorized remote access to a computer, or obtaining access to plaintext in cryptographic systems.\\
+-\\
 source: \href{https://en.wikipedia.org/wiki/Backdoor\textunderscore(computing)}{https://en.wikipedia.org/wiki/Backdoor\_(computing)}
 \end{frame}
 
@@ -226,7 +226,7 @@ source: \href{https://en.wikipedia.org/wiki/Backdoor\textunderscore(computing)}{
 \item Compromised certificate authority
 \item Private key stolen or unintentionally published
 \end{itemize}
-\\[0.2cm]
+-\\
 Which of these are targeted vs. automated attacks
 \note[itemize]{
 \item Lets make a distinction here
@@ -255,7 +255,7 @@ Which of these are targeted vs. automated attacks
 \item Code reviews
 \item Having control over artefacts 
 \end{itemize}
-\\[0.2cm]
+-\\
 \pause
 \emph{But how can the user be confident enough?}
 \begin{itemize}
@@ -330,7 +330,7 @@ binary   & 011111\textcolor{red}{1}0              & 011111\textcolor{mygreen}{0}
 \item An attack would have to be targeted\\ % and we are an unlikely target
 \item The build host is the one component you still have to trust even with traditional open source distributions. % so far
 \end{itemize}
-\\[0.2cm]
+-\\
 \pause
 \emph{Problems:}
 \begin{itemize}
@@ -338,7 +338,7 @@ binary   & 011111\textcolor{red}{1}0              & 011111\textcolor{mygreen}{0}
 \item Once infected, almost impossible to clean
 \item Can result from any backdoored software with enough access
 \end{itemize}
-\\[0.2cm]
+-\\
 \pause
 \emph{What can we do to prevent?}
 \begin{itemize}
@@ -356,8 +356,8 @@ binary   & 011111\textcolor{red}{1}0              & 011111\textcolor{mygreen}{0}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \begin{frame}{Motivation for reproducible builds}
 With free software, anyone can inspect the source code for malicious flaws. But Debian provide binary packages to its users. The idea of “deterministic” or “reproducible” builds is to empower anyone to verify that no flaws have been introduced during the build process by reproducing byte-for-byte identical binary packages from a given source. \\
-source: \href{https://wiki.debian.org/ReproducibleBuilds/About}{https://wiki.debian.org/ReproducibleBuilds/About}
-\\[0.1cm]
+source: \href{https://wiki.debian.org/ReproducibleBuilds/About}{https://wiki.debian.org/ReproducibleBuilds/About}\\
+-\\
 We often speak as if open source software can't contain backdoors or malware because its source code is "published", rendering any potentially malicious code visible. But real-world software release processes have major transparency gaps that aren't addressed by most existing open source development practices. The biggest such gap is that compilation and packaging processes aren't reproducible. Trying to recreate these processes typically yields a different result. That means users can't directly verify that the binary releases they download and use were actually created from the purportedly corresponding source trees.\\
 source: \href{https://air.mozilla.org/why-and-how-of-reproducible-builds-distrusting-our-own-infrastructure-for-safer-software-releases/}{https://air.mozilla.org/why-and-how-of-reproducible-builds-distrusting-our-own-infrastructure-for-safer-software-releases/}
 \note[itemize]{
@@ -410,8 +410,8 @@ source: \href{https://air.mozilla.org/why-and-how-of-reproducible-builds-distrus
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \begin{frame}{Compromised build tools}
-\emph{Unlikely but very serious}
-\\[0.2cm]
+\emph{Unlikely but very serious}\\
+-\\
 \begin{itemize}
 \item Not much you can do
 \item Trust whomever sold it to you
@@ -435,14 +435,14 @@ source: \href{https://air.mozilla.org/why-and-how-of-reproducible-builds-distrus
 \item Compression tool served by Npackd % a package manager for windows
 \item Email offers if you ever published an Android app
 \end{itemize}
-\\[0.2cm]
+-\\
 \pause
 \emph{As a software publisher:}
 \begin{itemize}
 \item Just don't do it!
 \item Loosing users and trust is not worth the few bucks
 \end{itemize}
-\\[0.2cm]
+-\\
 \pause
 \emph{As the user:}
 \begin{itemize}
@@ -472,7 +472,7 @@ source: \href{https://air.mozilla.org/why-and-how-of-reproducible-builds-distrus
 \item I won't go into details here
 \item Events just like today address this very issue
 \end{itemize}
-\\[0.2cm]
+-\\
 \pause
 \emph{As the user:}
 \begin{itemize}
@@ -484,12 +484,12 @@ source: \href{https://air.mozilla.org/why-and-how-of-reproducible-builds-distrus
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \begin{frame}{Bribed timestamping provider}
-This is probably the least severe case here
-\\[0.2cm]
-Timestamp provider is a single point of failure.
-\\[0.2cm]
-More secure methods, you can prove something existed at a certain date.
-\\[0.2cm]
+This is probably the least severe case here\\
+-\\
+Timestamp provider is a single point of failure.\\
+-\\
+More secure methods, you can prove something existed at a certain date.\\
+-\\
 \pause
 \begin{itemize}
 \item Create a hash of a document and publish it in a newspaper
@@ -550,7 +550,6 @@ More secure methods, you can prove something existed at a certain date.
 \end{itemize}
 \item Identity information 
 \end{itemize}
-\\[0.2cm]
 \pause
 \emph{Zooko's triangle}: properties considered desirable for names of participants in a network protocol
 \begin{itemize}
@@ -558,7 +557,6 @@ More secure methods, you can prove something existed at a certain date.
 \item \emph{Decentralized}: No need of a centralized authority for determining the meaning of a name
 \item \emph{Secure}: There is one, unique and specific entity to which the name applies
 \end{itemize}
-\\[0.2cm]
 \includegraphics[scale=0.2]{zooko_triangle.png}
 \note[itemize]{
 \item essentially a secure key value store
@@ -571,8 +569,8 @@ More secure methods, you can prove something existed at a certain date.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \begin{frame}{Private key stolen or unintentionally published}
-A private key is a very sensitive piece of information, and should be treated accodingly.
-\\[0.2cm]
+A private key is a very sensitive piece of information, and should be treated accodingly.\\
+-\\
 \begin{itemize}
 \item Never send a private key over unencrypted eMail % Reto has a story to this
 \item Never store a private key unencrypted on a cloud starage
@@ -586,13 +584,13 @@ A private key is a very sensitive piece of information, and should be treated ac
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \begin{frame}{Closing}
 All code presented in this document can be found at:\\
-\href{https://github.com/ulrichard/experiments/tree/master/trustworthy\textunderscoresoftware}{https://github.com/ulrichard/experiments/tree/master/trustworthy\_software}\\
-\\[0.5cm]
+\url{https://github.com/ulrichard/experiments/tree/master/trustworthy\_software}\\
+-\\
 It was written using vim, LaTeX and cmake. For more details see:\\
-\href{http://blog.ulrichard.ch/?p=1406}{http://blog.ulrichard.ch/?p=1406}\\
-\\[0.5cm]
+\url{http://blog.ulrichard.ch/?p=1406}\\
+-\\
 Thanks for listening
-\\[0.5cm]
+-\\
 Do you have questions?
 \end{frame}
 
