@@ -1,4 +1,4 @@
-\documentclass[11pt]{beamer}
+\documentclass[11pt, aspectratio=169]{beamer}
 %\setbeameroption{show notes}
 \usetheme{CambridgeUS}
 \usepackage[utf8]{inputenc}
@@ -43,12 +43,13 @@
 \begin{frame}{Why ``works on my machine'' is not enough}
 \textbf{Releasing binaries reproducibly}
 \begin{itemize}
-\item there was a time, when the release compiled binary from a developers machine was shipped to the customers
-\item these days we only ship binaries from bamboo
-\item we track revisions and dependencies
-\item but the configuration of the build agents became complicated over time
+\item distant past: release compiled binary from a developers machine
+\item present: binaries from bamboo
+\item source constrol system revisions
+\item versions of external dependencies packages
+\item configuration of the build agents
 \item docker offers a way to define the environment in a text file
-\item the docker file can be versioned
+\item docker files can be versioned
 \end{itemize}
 \end{frame}
 
@@ -67,6 +68,7 @@
 \movie[label=show3,width=1.0\textwidth,poster
        ,autostart,showcontrols,loop] 
   {\includegraphics[width=1.0\textwidth]{pGYAg7TMmp0.png}}{pGYAg7TMmp0.webm}
+\url{https://www.youtube.com/watch?v=pGYAg7TMmp0}
 \end{frame}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -128,7 +130,7 @@ All code presented in this document can be found at:\\
 \url{https://github.com/ulrichard/experiments/tree/master/docker}\\
 -\\
 It was written using vim, LaTeX and cmake. For more details see:\\
-\url{http://blog.ulrichard.ch/?p=1406}\\
+\url{https://ulrichard.ch/blog/?p=1406}\\
 -\\
 Thanks for listening
 -\\

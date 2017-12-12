@@ -16,8 +16,8 @@ RUN apt-get update && apt-get install -y libgtk2.0-0 libnotify4 \
     libgconf-2-4 libnss3 libasound2
 
 # download and extract the jaxx archive
-RUN wget https://jaxx.io/files/1.1.7/Jaxx-v1.1.7-linux-x64.tar.gz
-    && tar -xf Jaxx-v1.1.7-linux-x64.tar.gz
+RUN wget https://jaxx.io/files/1.1.7/Jaxx-v1.1.7-linux-x64.tar.gz \
+    && tar -xf Jaxx-v1.1.7-linux-x64.tar.gz \
     && rm Jaxx-v1.1.7-linux-x64.tar.gz
 
 # determine dependencies

@@ -19,6 +19,8 @@ IF(NOT EXISTS "${PROJECT_BINARY_DIR}/pGYAg7TMmp0.webm")
     EXECUTE_PROCESS(COMMAND youtube-dl -o pGYAg7TMmp0.webm pGYAg7TMmp0)
 ENDIF()
 
+ADD_CUSTOM_TARGET(BuildContainer COMMAND docker build -t jaxx ${docker_SOURCE_DIR})
+
 # http://www.cmake.org/Wiki/CMakeUserUseLATEX
 INCLUDE(UseLATEX)
 ADD_LATEX_DOCUMENT(docker.tex 
