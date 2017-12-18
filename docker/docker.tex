@@ -45,7 +45,7 @@
 \begin{itemize}
 \item distant past: release compiled binary from a developers machine
 \item present: binaries from bamboo
-\item source constrol system revisions
+\item source control system revisions
 \item versions of external dependencies packages
 \item configuration of the build agents
 \item docker offers a way to define the environment in a text file
@@ -55,10 +55,13 @@
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \begin{frame}{Table of contents}
-\begin{itemize}
-\item Introduction video
-\item Dissection of an example
-\end{itemize}
+\begin{outline}
+\1 Introduction video
+\1 Dissection of an example
+  \2 Dockerfile
+  \2 Build the container
+  \2 Run the container
+\end{outline}
 \end{frame}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -79,6 +82,7 @@
 \1 Risks include:
   \2 Stealing of private keys stored on the harddisk
   \2 Exposing transaction history from stored wallets
+  \2 Polluting the environment with libraries in non standard locations
 \1 Docker offers protection by running in an encapsulated environment
 \1 Much more lightweight and convenient than a virtual machine
 \end{outline}
